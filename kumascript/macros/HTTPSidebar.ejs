@@ -13,261 +13,198 @@ function state(section) {
 }
 
 var text = mdn.localStringMap({
-  'en-US': {
+  'de': {
     'HTTP': 'HTTP',
-    'HTTPGuide': 'HTTP guide',
-    'Basics': 'Basics of HTTP',
-    'Overview': 'Overview of HTTP',
-    'Evolution': 'Evolution of HTTP',
-    'ResourcesURI': 'Resources and URIs',
-    'Identifying': 'Identifying resources on the Web',
-    'DataURIs': 'Data URIs',
-    'MIMETypes': 'Introduction to MIME types',
-    'ListMIMETypes': 'Common MIME types',
-    'WWWorNotWWW': 'Choosing between www and non-www URLs',
-    'Messages': 'HTTP Messages',
-    'Session': 'A typical HTTP session',
-    'Connection1x': 'Connection management in HTTP/1.x',
-    'Ranges': 'HTTP range requests',
-    'Redirects': 'HTTP redirects',
-    'Conditionals': 'HTTP conditional requests',
-    'ContentNego': 'HTTP content negotiation',
-    'Headers': 'HTTP headers',
-    'Response_codes': 'Response codes',
-    'Compression': 'HTTP compression',
-    'Cookies': 'HTTP cookies',
-    'Caching': 'HTTP caching',
-    'CORS': 'HTTP access control (CORS)',
-    'Resources': 'HTTP specifications',
-    'Feature_policy': 'Feature policy',
-    'Guides': 'Guides:',
-    'Reference': 'References:',
-    'Methods': 'HTTP request methods',
-    'Status': 'HTTP response status codes',
-    'CSPDirectives': 'CSP directives',
-    'CORS_errors': 'CORS errors',
-    'FeaturePolicyDirectives': 'Feature-Policy directives',
-    'Security': 'HTTP security',
-    'Authentication': 'HTTP authentication',
-    'ProtocolUpgradeMech': 'Protocol upgrade mechanism'
+    'HTTPGuide': 'HTTP-Leitfaden',
+    'Basics': 'Grundlagen von HTTP',
+    'Overview': 'Übersicht über HTTP',
+    'Evolution': 'Entwicklung von HTTP',
+    'ResourcesURI': 'Ressourcen und URIs',
+    'Identifying': 'Identifizieren von Ressourcen im Web',
+    'DataURLs': 'Daten-URLs',
+    'MIMETypes': 'Einführung in MIME-Typen',
+    'ListMIMETypes': 'Gängige MIME-Typen',
+    'WWWorNotWWW': 'Auswahl zwischen www und nicht-www URLs',
+    'Messages': 'HTTP-Nachrichten',
+    'Session': 'Eine typische HTTP-Sitzung',
+    'Connection1x': 'Verbindungsverwaltung in HTTP/1.x',
+    'Ranges': 'HTTP-Bereichsanfragen',
+    'Redirects': 'HTTP-Weiterleitungen',
+    'Conditionals': 'HTTP-Bedingte Anfragen',
+    'ContentNego': 'HTTP-Inhaltsverhandlung',
+    'Headers': 'HTTP-Header',
+    'Response_codes': 'Antwortcodes',
+    'Compression': 'HTTP-Komprimierung',
+    'Cookies': 'HTTP-Cookies',
+    'Caching': 'HTTP-Caching',
+    'CORS': 'HTTP-Zugriffskontrolle (CORS)',
+    'Resources': 'HTTP-Spezifikationen',
+    'Permissions_Policy': 'Berechtigungsrichtlinie',
+    'Guides': 'Anleitungen',
+    'Reference': 'Referenzen',
+    'Methods': 'HTTP-Anfragemethoden',
+    'Status': 'HTTP-Antwortstatuscodes',
+    'CSPDirectives': 'CSP-Direktiven',
+    'CORS_errors': 'CORS-Fehler',
+    'PermissionsPolicyDirectives': 'Permissions-Policy Direktiven',
+    'Security': 'HTTP-Sicherheit',
+    'Authentication': 'HTTP-Authentifizierung',
+    'ProtocolUpgradeMech': 'Protokoll-Upgrade-Mechanismus',
+    'CSP': 'Content Security Policy (CSP)'
   },
-    'es': {
-    'HTTP': 'HTTP',
-    'Basics': 'Fundamentos de HTTP',
-    'Overview': 'Generalidades de HTTP',
-    'Evolution': 'Evolución de HTTP',
-    'ResourcesURI': 'Recursons y URIs',
-    'Identifying': 'Identificación de recursons en la Web',
-    'DataURIs': 'URIs de Datos',
-    'MIMETypes': 'Presentación de tipos MIME',
-    'ListMIMETypes': 'Lista completa de tipos MIME',
-    'WWWorNotWWW': 'Eleción entre ww y no-www URLs',
-    'Messages': 'Mensajes HTTP',
-    'Session': 'Una típica comunicación HTTP',
-    'Connection1x': 'Gestión de la conexión en HTTP/1.x',
-    'Ranges': 'Rangos de peticiones HTTP',
-    'Redirects': 'Redirecciones en HTTP',
-    'Conditionals': 'Peticiones condicionales en HTTP',
-    'ContentNego': 'Gestión del contenido en HTTP',
-    'Headers': 'Cabeceras HTTP',
-    'Response_codes': 'Códigos de respuesta',
-    'Compression': 'Compresión en HTTP',
-    'Cookies': 'HTTP cookies',
-    'Caching': 'HTTP caching',
-    'CORS': 'Control de acceso en HTTP(CORS)',
-    'Resources': 'La especificación de HTTP',
-    'Guides': 'Guias:',
-    'Reference': 'Referencias:',
-    'Methods': 'Métodos de petición HTTP',
-    'Status': 'Códigos de estado de HTTP',
+  'en-US': {
+    'CORS_errors': 'CORS errors',
+    'CSPDirectives': 'CSP directives',
+    'Guides': 'Guides',
+    'Headers': 'HTTP headers',
+    'Methods': 'HTTP request methods',
+    'PermissionsPolicyDirectives': 'Permissions-Policy directives',
+    'Reference': 'References',
+    'Security': 'Security and privacy',
+    'Status': 'HTTP response status codes'
+  },
+  'es': {
+    'CORS_errors': 'Errores de CORS',
     'CSPDirectives': 'Directivas CSP',
+    'Guides': 'Guías',
+    'Headers': 'Cabeceras HTTP',
+    'Methods': 'Métodos de petición HTTP',
+    'PermissionsPolicyDirectives': 'Directivas Permissions-Policy',
+    'Reference': 'Referencias',
     'Security': 'Seguridad en HTTP',
-    'Authentication': 'Autenticación en HTTP'
+    'Status': 'Códigos de estado de HTTP'
+  },
+  'fr': {
+    'CORS_errors': 'Erreurs CORS',
+    'CSPDirectives': 'Directives CSP',
+    'Guides': 'Guides',
+    'Headers': 'En-têtes HTTP',
+    'Methods': 'Méthodes de requête HTTP',
+    'PermissionsPolicyDirectives': 'Directives Permissions-Policy',
+    'Reference': 'Références',
+    'Security': 'Sécurité HTTP',
+    'Status': 'Codes de statut de réponse HTTP'
   },
   'ja': {
-    'HTTP': 'HTTP',
-    'HTTPGuide': 'HTTP ガイド',
-    'Basics': 'HTTP の基本',
-    'Overview': 'HTTP の概要',
-    'Evolution': 'HTTP の進化',
-    'ResourcesURI': 'リソースと URI',
-    'Identifying': 'ウェブ上のリソースの識別',
-    'DataURIs': 'データ URL',
-    'MIMETypes': 'MIME タイプ入門',
-    'ListMIMETypes': 'よくある MIME タイプ',
-    'WWWorNotWWW': 'www 付きと www なしの URL の選択',
-    'Messages': 'HTTP メッセージ',
-    'Session': '典型的な HTTP セッション',
-    'Connection1x': 'HTTP/1.x のコネクション管理',
-    'Ranges': 'HTTP 範囲リクエスト',
-    'Redirects': 'HTTP のリダイレクト',
-    'Conditionals': 'HTTP 条件付きリクエスト',
-    'ContentNego': 'コンテントネゴシエーション',
-    'Headers': 'HTTP ヘッダー',
-    'Response_codes': 'レスポンスコード',
-    'Compression': 'HTTP の圧縮',
-    'Cookies': 'HTTP Cookie',
-    'Caching': 'HTTP キャッシュ',
-    'CORS': 'HTTP アクセス制御 (CORS)',
-    'Resources': 'HTTP 仕様書',
-    'Feature_policy': '機能ポリシー',
-    'Guides': 'ガイド:',
-    'Reference': 'リファレンス:',
-    'Methods': 'HTTP リクエストメソッド',
-    'Status': 'HTTP レスポンスステータスコード',
-    'CSPDirectives': 'CSP ディレクティブ',
     'CORS_errors': 'CORS エラー',
-    'FeaturePolicyDirectives': '機能ポリシーディレクティブ',
+    'CSPDirectives': 'CSP ディレクティブ',
+    'Guides': 'ガイド',
+    'Headers': 'HTTP ヘッダー',
+    'Methods': 'HTTP リクエストメソッド',
+    'PermissionsPolicyDirectives': '機能ポリシーディレクティブ',
+    'Reference': 'リファレンス',
     'Security': 'HTTP セキュリティ',
-    'Authentication': 'HTTP 認証',
-    'ProtocolUpgradeMech': 'プロトコルのアップグレードの仕組み'
+    'Status': 'HTTP レスポンスステータスコード'
   },
   'ko': {
-    'HTTP': 'HTTP',
-    'HTTPGuide': 'HTTP 가이드',
-    'Basics': 'HTTP 기본',
-    'Overview': 'HTTP 개요',
-    'Evolution': 'HTTP의 진화',
-    'ResourcesURI': '리소스와 URIs',
-    'Identifying': '웹의 리소스 식별하기',
-    'DataURIs': '데이터 URIs',
-    'MIMETypes': 'MIME 타입 소개',
-    'ListMIMETypes': 'MIME 타입의 전체 리스트',
-    'WWWorNotWWW': 'www와 non-www URL 중에서 선택하기',
-    'Messages': 'HTTP 메시지',
-    'Session': '전형적인 HTTP 세션',
-    'Connection1x': 'HTTP/1.x의 연결 관리',
-    'Ranges': 'HTTP range 요청',
-    'Redirects': 'HTTP 리다이렉트',
-    'Conditionals': 'HTTP 조건부 요청',
-    'ContentNego': 'HTTP 컨텐츠 협상',
-    'Headers': 'HTTP 헤더',
-    'Response_codes': '응답 코드',
-    'Compression': 'HTTP 압축',
-    'Cookies': 'HTTP 쿠키',
-    'Caching': 'HTTP 캐싱',
-    'CORS': 'HTTP 접근 제어(CORS)',
-    'Resources': 'HTTP 명세',
-    'Feature_policy': 'Feature policy',
-    'Guides': '가이드:',
-    'Reference': '레퍼런스:',
-    'Methods': 'HTTP 요청 메소드',
-    'Status': 'HTTP 응답 상태 코드',
-    'CSPDirectives': 'CSP 지시문',
     'CORS_errors': 'CORS 에러',
-    'FeaturePolicyDirectives': 'Feature-Policy 지시문',
+    'CSPDirectives': 'CSP 지시문',
+    'Guides': '가이드',
+    'Headers': 'HTTP 헤더',
+    'Methods': 'HTTP 요청 메소드',
+    'PermissionsPolicyDirectives': 'Permissions-Policy 지시문',
+    'Reference': '레퍼런스',
     'Security': 'HTTP 보안',
-    'Authentication': 'HTTP 인증',
-    'ProtocolUpgradeMech': '프로토콜 업그레이드 메커니즘'
+    'Status': 'HTTP 응답 상태 코드'
   },
   'ru': {
-    'HTTP': 'HTTP',
-    'Session': 'Базовая сессия',
-    'Headers': 'Заголовки',
-    'Response_codes': 'Коды ответа',
-    'Cookies': 'Куки',
-    'CORS': 'HTTP контроль доступа (CORS)',
-    'Guides': 'Guides:',
-    'Reference': 'References:'
+    'CORS_errors': 'Ошибки CORS',
+    'CSPDirectives': 'Директивы CSP',
+    'Guides': 'Учебники',
+    'Headers': 'Заголовки HTTP',
+    'Methods': 'Методы HTTP запроса',
+    'PermissionsPolicyDirectives': 'Директивы Permissions-Policy',
+    'Reference': 'Справочники',
+    'Security': 'Безопасность в HTTP',
+    'Status': 'Коды ответа HTTP'
+  },
+  'zh-CN': {
+    'CORS_errors': 'CORS 错误',
+    'CSPDirectives': 'CSP 指令',
+    'Guides': '指南：',
+    'Headers': 'HTTP 标头',
+    'Methods': 'HTTP 请求方法',
+    'PermissionsPolicyDirectives': '权限策略指令',
+    'Reference': '参考：',
+    'Security': 'HTTP 安全',
+    'Status': 'HTTP 响应状态码'
   }
 });
 %>
 
 
-<section id="Quick_links">
+<section id="Quick_links" data-macro="HTTPSidebar">
   <ol>
-    <li><a href="/<%=locale%>/docs/Web/HTTP"><strong><em><%=text['HTTP']%></em></strong></a></li>
-    <li><strong><%=text['Guides']%></strong></li>
+    <li class="section"><%-web.smartLink(`/${locale}/docs/Web/HTTP`)%></li>
+    <li class="section no-link"><%=text['Guides']%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Overview`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Session`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Messages`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/MIME_types`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Compression`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Caching`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Authentication`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Cookies`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Redirections`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Conditional_requests`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Range_requests`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Content_negotiation`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Connection_management_in_HTTP_1.x`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Evolution_of_HTTP`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Protocol_upgrade_mechanism`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Proxy_servers_and_tunneling`)%></li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Client_hints`)%></li>
     <li class="toggle">
-        <details>
-            <summary><%=text['ResourcesURI']%></summary>
-            <ol>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/Identifying_resources_on_the_Web"><%=text['Identifying']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/Data_URIs"><%=text['DataURIs']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/MIME_Types"><%=text['MIMETypes']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types"><%=text['ListMIMETypes']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/Choosing_between_www_and_non-www_URLs"><%=text['WWWorNotWWW']%></a></li>
-            </ol>
-        </details>
+      <details>
+        <summary><%=text['Security']%></summary>
+        <ol>
+          <li><%-web.smartLink(`/${locale}/docs/Web/Security/Practical_implementation_guides`)%></li>
+          <li><a href="/en-US/observatory">HTTP Observatory</a></li>
+          <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Permissions_Policy`)%></li>
+          <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/CSP`)%></li>
+          <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/CORS`)%></li>
+          <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Cross-Origin_Resource_Policy`)%></li>
+          <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Headers/Strict-Transport-Security`)%></li>
+        </ol>
+      </details>
+    </li>
+    <li class="section no-link"><%=text['Reference']%></li>
+    <li class="toggle">
+      <details <%=state('Web/HTTP/Headers')%>>
+        <summary><%=text['Headers']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers'])%>
+      </details>
     </li>
     <li class="toggle">
-        <details>
-            <summary><%=text['HTTPGuide']%></summary>
-            <ol>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP"><%=text['Basics']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Overview"><%=text['Overview']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP"><%=text['Evolution']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Messages"><%=text['Messages']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Session"><%=text['Session']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Connection_management_in_HTTP_1.x"><%=text['Connection1x']%></a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Protocol_upgrade_mechanism"><%=text['ProtocolUpgradeMech']%></a></li>
-            </ol>
-        </details>
+      <details <%=state('Web/HTTP/Methods')%>>
+        <summary><%=text['Methods']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Methods'])%>
+      </details>
     </li>
     <li class="toggle">
-        <details>
-            <summary><%=text['Security']%></summary>
-            <ol>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/CSP">Content Security Policy (CSP)</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Public_Key_Pinning">HTTP Public Key Pinning (HPKP)</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Headers/Strict-Transport-Security">HTTP Strict Transport Security (HSTS)</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies">Cookie security</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Headers/X-Content-Type-Options">X-Content-Type-Options</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Headers/X-Frame-Options">X-Frame-Options</a></li>
-                <li><a href="/<%=locale%>/docs/Web/HTTP/Headers/X-XSS-Protection">X-XSS-Protection</a></li>
-                <li><a href="https://wiki.mozilla.org/Security/Guidelines/Web_Security">Mozilla web security guidelines</a></li>
-                <li><a href="https://observatory.mozilla.org/">Mozilla Observatory</a></li>
-            </ol>
-        </details>
-    </li>
-
-    <li><a href="/<%=locale%>/docs/Web/HTTP/CORS"><%=text['CORS']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Authentication"><%=text['Authentication']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Caching"><%=text['Caching']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Compression"><%=text['Compression']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Conditional_requests"><%=text['Conditionals']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Content_negotiation"><%=text['ContentNego']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Cookies"><%=text['Cookies']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Range_requests"><%=text['Ranges']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Redirections"><%=text['Redirects']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Resources_and_specifications"><%=text['Resources']%></a></li>
-    <li><a href="/<%=locale%>/docs/Web/HTTP/Feature_Policy"><%=text['Feature_policy']%></a></li>
-    <li><strong><%=text['Reference']%></strong></li>
-    <li class="toggle">
-        <details <%=state('Web/HTTP/Headers')%>>
-            <summary><%=text['Headers']%></summary>
-            <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers'])%>
-        </details>
+      <details <%=state('Web/HTTP/Status')%>>
+        <summary><%=text['Status']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Status'])%>
+      </details>
     </li>
     <li class="toggle">
-        <details <%=state('Web/HTTP/Methods')%>>
-            <summary><%=text['Methods']%></summary>
-            <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Methods'])%>
-        </details>
+      <details <%=state('Web/HTTP/Headers/Content-Security-Policy')%>>
+        <summary><%=text['CSPDirectives']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers/Content-Security-Policy'])%>
+      </details>
     </li>
     <li class="toggle">
-        <details <%=state('Web/HTTP/Status')%>>
-          <summary><%=text['Status']%></summary>
-          <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Status'])%>
-        </details>
+      <details <%=state('Web/HTTP/CORS/Errors')%>>
+        <summary><%=text['CORS_errors']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/CORS/Errors', 1])%>
+      </details>
     </li>
     <li class="toggle">
-        <details <%=state('Web/HTTP/Headers/Content-Security-Policy')%>>
-          <summary><%=text['CSPDirectives']%></summary>
-          <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers/Content-Security-Policy'])%>
-        </details>
+      <details <%=state('Web/HTTP/Headers/Permissions-Policy')%>>
+        <summary><%=text['PermissionsPolicyDirectives']%></summary>
+        <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers/Permissions-Policy', 1])%>
+      </details>
     </li>
-    <li class="toggle">
-        <details <%=state('Web/HTTP/CORS/Errors')%>>
-          <summary><%=text['CORS_errors']%></summary>
-          <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/CORS/Errors', 1])%>
-        </details>
-    </li>
-    <li class="toggle">
-        <details <%=state('Web/HTTP/Headers/Feature-Policy')%>>
-          <summary><%=text['FeaturePolicyDirectives']%></summary>
-          <%-await template("ListSubpagesForSidebar", ['/en-US/docs/Web/HTTP/Headers/Feature-Policy', 1])%>
-        </details>
-    </li>
+    <li><%-web.smartLink(`/${locale}/docs/Web/HTTP/Resources_and_specifications`)%></li>
   </ol>
 </section>

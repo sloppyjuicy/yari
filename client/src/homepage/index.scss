@@ -1,15 +1,24 @@
-@import "~@mdn/minimalist/sass/mixins/utils";
-@import "~@mdn/minimalist/sass/vars/layout";
+@use "../ui/vars" as *;
 
-.home-content-container {
-  margin: 0 auto;
-  max-width: $max-width-default;
-  padding: $base-spacing;
+.homepage {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  overflow-y: visible;
   position: relative;
 
-  @media #{$mq-small-desktop-and-up} {
-    @include gap($base-spacing);
-    display: flex;
-    margin: ($base-spacing * 2) auto;
+  width: 100%;
+
+  > * {
+    margin-top: 2rem;
+  }
+
+  > *:first-child {
+    margin-top: 0;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 }

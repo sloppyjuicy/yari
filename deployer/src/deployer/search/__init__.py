@@ -5,7 +5,7 @@ from pathlib import Path
 from collections import Counter
 
 import click
-from elasticsearch.helpers import parallel_bulk
+from elasticsearch.helpers import streaming_bulk
 from elasticsearch_dsl import Index
 from elasticsearch_dsl.connections import connections
 from selectolax.parser import HTMLParser
@@ -90,7 +90,7 @@ def index(
     errors_counter = Counter()
     t0 = time.time()
     with get_progressbar() as bar:
-        for success, info in parallel_bulk(
+        for success, info in streaming_bulk(
             connection,
             generator(),
             # If the bulk indexing failed, it will by default raise a BulkIndexError.
@@ -109,7 +109,14 @@ def index(
             else:
                 count_errors += 1
                 error_data = info["index"]["error"]
-                error_key = f"{error_data['type']}: {error_data['reason']}"
+
+                if isinstance(error_data, dict):
+                    error_key = f"{error_data['type']}: {error_data['reason']}"
+                elif isinstance(error_data, str):
+                    error_key = error_data
+                else:
+                    error_key = str(error_data)
+
                 errors_counter[error_key] += 1
             count_done += 1
             bar.update(1)
@@ -201,11 +208,19 @@ def walk(root):
 def to_search(file, _index=None):
     with open(file) as f:
         data = json.load(f)
+    if "blogMeta" in data:
+        # Skip blog content for now.
+        return
     if "doc" not in data:
         # If the file we just opened isn't use for documents, it might be for
         # other SPAs like the home page. Skip these.
         return
     doc = data["doc"]
+
+    if "/docs/" not in doc["mdn_url"]:
+        # Skip non docs content for now.
+        return
+
     locale, slug = doc["mdn_url"].split("/docs/", 1)
     if slug.endswith("/Index"):
         # We have a lot of pages that uses the `{{Index(...)}}` kumascript macro
@@ -233,7 +248,7 @@ def to_search(file, _index=None):
             )
         ),
         popularity=doc["popularity"],
-        summary=doc["summary"],
+        summary=doc.get("summary", ""),
         # Note! We're always lowercasing the 'slug'. This way we can search on it,
         # still as a `keyword` index, but filtering by prefix.
         # E.g. in kuma; ?slug_prefix=weB/Css

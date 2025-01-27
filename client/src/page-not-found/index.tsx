@@ -1,17 +1,17 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 
-import { PageContentContainer } from "../ui/atoms/page-content";
+import { MainContentContainer } from "../ui/atoms/page-content";
 import "./index.scss";
 
 const FallbackLink = React.lazy(() => import("./fallback-link"));
 
 // NOTE! To hack on this component, you have to use a trick to even get to this
-// unless you use the Express server on localhost:5000.
-// To get here, use http://localhost:3000/en-US/_404/Whatever/you/like
+// unless you use the Express server on localhost:5042.
+// To get here, use http://localhost:3000/en-US/404/Whatever/you/like
 // Now hot-reloading works and you can iterate faster.
-// Otherwise, you can use http://localhost:5000/en-US/docs/Whatever/you/like
-// (note the :5000 port) and that'll test it a bit more realistically.
+// Otherwise, you can use http://localhost:5042/en-US/docs/Whatever/you/like
+// (note the :5042 port) and that'll test it a bit more realistically.
 
 export function PageNotFound() {
   const location = useLocation();
@@ -26,27 +26,29 @@ export function PageNotFound() {
   }, [location]);
 
   return (
-    <div className="page-not-found">
-      <PageContentContainer>
-        {/* This string should match the `pageTitle` set in ssr/render.js */}
-        <h1>Page not found</h1>
+    <div className="main-wrapper page-not-found">
+      <MainContentContainer>
+        <article className="main-page-content">
+          {/* This string should match the `pageTitle` set in ssr/render.js */}
+          <h1>Page not found</h1>
 
-        {url && (
-          <p className="sorry-message">
-            Sorry, the page <code>{url}</code> could not be found.
+          {url && (
+            <p className="sorry-message">
+              Sorry, the page <code>{url}</code> could not be found.
+            </p>
+          )}
+
+          {url && (
+            <React.Suspense fallback={null}>
+              <FallbackLink url={url} />
+            </React.Suspense>
+          )}
+
+          <p>
+            <a href="/">Go back to the home page</a>
           </p>
-        )}
-
-        {url && (
-          <React.Suspense fallback={null}>
-            <FallbackLink url={url} />
-          </React.Suspense>
-        )}
-
-        <p>
-          <a href="/">Go back to the home page</a>
-        </p>
-      </PageContentContainer>
+        </article>
+      </MainContentContainer>
     </div>
   );
 }
