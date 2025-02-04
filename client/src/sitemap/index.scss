@@ -1,22 +1,22 @@
-@import "~@mdn/minimalist/sass/vars/typography";
-
 #sitemap {
   min-height: 800px;
 
   div.opening-in-your-editor {
     float: right;
-    font-size: $small-font-size;
+    font-size: 0.8125rem;
   }
+
   ul.breadcrumb {
     li {
-      list-style-type: none;
       display: inline-block;
+      list-style-type: none;
       margin-right: 5px;
 
       &::after {
         content: " /";
       }
     }
+
     li.last,
     li.this-doc {
       &::after {

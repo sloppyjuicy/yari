@@ -1,264 +1,345 @@
 <%
 // Generate quick links for JavaScript standard objects docs
-//
-// TODO: Ordering of prototype / static methods (bug 948576)
-//
-// Parameters are OBSOLETE. DO NOT USE ANYMORE.
-//
-//  $0 - JavaScript reference section (e.g Global_Objects) – OBSOLETE
-//  $1 - JavaScript reference object/subject (e.g. Number, Array, Function) – OBSOLETE
-//  $2 - Related objects to display (comma separated) – OBSOLETE
 
 // Strings
-var commonl10n = web.getJSONData('L10n-Common');
-var jsl10n = web.getJSONData('L10n-JavaScript');
+const commonl10n = web.getJSONData("L10n-Common");
+const jsl10n = web.getJSONData("L10n-JavaScript");
 
-var text = {
-    'stdlib': mdn.getLocalString(jsl10n, 'stdlib'),
-    'Properties': mdn.getLocalString(commonl10n, 'Properties'),
-    'Methods': mdn.getLocalString(commonl10n, 'Methods'),
-    'Inheritance': mdn.getLocalString(commonl10n, 'Inheritance'),
-    'Related': mdn.getLocalString(commonl10n, 'Related_pages_wo_group'),
-    'translate': mdn.getLocalString(commonl10n, '[Translate]'),
-    'translationCTA': mdn.getLocalString(commonl10n, 'TranslationCTA'),
+const text = {
+  stdlib: mdn.getLocalString(jsl10n, "stdlib"),
+  Constructor: mdn.getLocalString(commonl10n, "Constructor"),
+  StaticMethods: mdn.getLocalString(commonl10n, "Static_methods"),
+  StaticProperties: mdn.getLocalString(commonl10n, "Static_properties"),
+  InstanceMethods: mdn.getLocalString(commonl10n, "Instance_methods"),
+  InstanceProperties: mdn.getLocalString(commonl10n, "Instance_properties"),
+  Inheritance: mdn.getLocalString(commonl10n, "Inheritance"),
+  Related: mdn.getLocalString(commonl10n, "Related_pages_wo_group"),
 };
-
 
 // Variables
-var containsTag = page.hasTag;
-var slug = env.slug;
-var output = "";
-// slug is not available in preview mode.
-if (slug) {
-var locale = env.locale;
-var rtlLocales = ['ar', 'he', 'fa'];
-var slug_stdlib = `/${env.locale}/docs/Web/JavaScript/Reference/Global_Objects`;
-var mainObj = slug.replace('Web/JavaScript/Reference/Global_Objects/', '').split('/')[0];
+const slug = env.slug;
+const locale = env.locale;
+const rtlLocales = ["ar", "he", "fa"];
+const slugStdlib = `/${env.locale}/docs/Web/JavaScript/Reference/Global_Objects`;
+
+function slugToObjName(slug) {
+  const subPath = slug.replace("Web/JavaScript/Reference/Global_Objects/", "");
+  // Handle special cases
+  if (subPath.startsWith("Intl/Segmenter/segment/Segments")) {
+    return "Intl/Segmenter/segment/Segments";
+  } else if (subPath.startsWith("Proxy/Proxy")) {
+    return "Proxy/handler";
+  } else if (/Intl\/[a-z]/.test(subPath)) {
+    // If we are on a method page of Intl (e.g. Intl.supportedLocalesOf),
+    // the main object is Intl
+    return "Intl";
+  }
+  let subPathParts = subPath.split("/");
+  // For Intl, we should use the first two parts of the slug if has
+  // e.g. subPath startswith "Intl/Collator" we should use "Intl.Collator"
+  // note that Intl owns some methods, which are already handled above
+  subPathParts = subPathParts.slice(0, subPathParts[0] === "Intl" ? 2 : 1);
+  return subPathParts.join(".");
+}
+
+const mainObj = slugToObjName(slug);
 
 // Data for inheritance chain
-var inheritance = ["Object", "Function"];
-var inheritanceData = {
-    "Math": ["Object"],
-    "Date": ["Object"],
-    "Function": ["Object"],
-    "Object": [],
-    "JSON": ["Object"],
-    "Intl": ["Object"],
-    "arguments": [],
-    "Reflect": ["Object"],
-    "Proxy": [],
-    "Atomics": ["Object"],
-    "WebAssembly": ["Object"],
+const inheritanceData = {
+  AggregateError: ["Error"],
+  AsyncFunction: ["Function"],
+  AsyncGenerator: ["AsyncIterator"],
+  AsyncGeneratorFunction: ["Function"],
+  BigInt64Array: ["TypedArray"],
+  BigUint64Array: ["TypedArray"],
+  EvalError: ["Error"],
+  Float32Array: ["TypedArray"],
+  Float64Array: ["TypedArray"],
+  Generator: ["Iterator"],
+  GeneratorFunction: ["Function"],
+  Int8Array: ["TypedArray"],
+  Int16Array: ["TypedArray"],
+  Int32Array: ["TypedArray"],
+  InternalError: ["Error"],
+  RangeError: ["Error"],
+  ReferenceError: ["Error"],
+  SyntaxError: ["Error"],
+  TypeError: ["Error"],
+  Uint8Array: ["TypedArray"],
+  Uint8ClampedArray: ["TypedArray"],
+  Uint16Array: ["TypedArray"],
+  Uint32Array: ["TypedArray"],
+  URIError: ["Error"],
 };
-if (typeof inheritanceData[mainObj] != 'undefined') {
-    inheritance = inheritanceData[mainObj];
+
+const inheritance = inheritanceData[mainObj] ?? [];
+
+if (
+  !["Proxy", "Atomics", "Math", "Intl", "JSON", "Reflect"].includes(mainObj)
+) {
+  // %Base% is the default inheritance when the class has no extends clause:
+  // instances inherit from Object.prototype, and class inherits from Function.prototype
+  inheritance.push("%Base%");
 }
+
+inheritance.unshift(mainObj);
 
 // Data for related pages
-var groupData = {
-    "Error": ["Error", "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError"],
-    "Intl": ["Intl", "Intl.Collator", "Intl.DateTimeFormat", "Intl.ListFormat", "Intl.NumberFormat", "Intl.PluralRules", "Intl.RelativeTimeFormat"],
-    "TypedArray": ["TypedArray", "Int8Array", "Uint8Array", "Uint8ClampedArray", "Int16Array", "Uint16Array",
-                   "Int32Array", "Uint32Array", "Float32Array", "Float64Array", "BigInt64Array", "BigUint64Array"],
-    "Proxy": ["Proxy", "handler"],
-    "WebAssembly": ["WebAssembly", "WebAssembly.Module", "WebAssembly.Global", "WebAssembly.Instance", "WebAssembly.Memory",
-                    "WebAssembly.Table", "WebAssembly.CompileError", "WebAssembly.LinkError", "WebAssembly.RuntimeError"],
+const groupData = {
+  Error: [
+    "Error",
+    ...Object.keys(inheritanceData).filter((key) =>
+      inheritanceData[key].includes("Error")
+    ),
+  ],
+  Intl: [
+    "Intl",
+    ...(await page
+      .subpagesExpand(
+        "/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl",
+      )
+      .filter((page) => page.pageType === "javascript-class")
+      .map((page) => slugToObjName(page.slug))),
+  ],
+  Segments: [
+    "Intl/Segmenter/segment/Segments",
+    "Intl.Segmenter",
+  ],
+  TypedArray: [
+    "TypedArray",
+    ...Object.keys(inheritanceData).filter((key) =>
+      inheritanceData[key].includes("TypedArray")
+    ),
+  ],
+  Proxy: ["Proxy", "Proxy/handler"],
 };
-
-// Exceptions, we want the main object in the sidebar (e.g. Int8Array -> TypedArray)
-if (groupData["TypedArray"].indexOf(mainObj) != -1) { mainObj = "TypedArray"; }
-if (groupData["Error"].indexOf(mainObj) != -1) { mainObj = "Error"; }
-if (groupData["Proxy"].indexOf(mainObj) != -1) { mainObj = "Proxy/handler"; }
 
 // Get related pages from groups and exclude self
-var group = [];
-for(g in groupData) {
-    var index = groupData[g].indexOf(mainObj);
-    if(index != -1 ) {
-        group = groupData[g];
-        group.splice(index, 1);
-        break;
+let group = [];
+for (const groupItem of Object.values(groupData)) {
+  const index = groupItem.indexOf(mainObj);
+  if (index !== -1) {
+    group = groupItem;
+    group.splice(index, 1);
+    if (mainObj in inheritanceData) {
+      // These pages are already shown in the inheritance chain, no need to
+      // show them again in related pages
+      inheritanceData[mainObj].forEach((item) => {
+        if (group.includes(item)) {
+          group.splice(group.indexOf(item), 1);
+        }
+      });
     }
+    break;
+  }
 }
+
+function isPrototypeMemberPage(page) {
+  return [
+    "javascript-instance-accessor-property",
+    "javascript-instance-data-property",
+    "javascript-instance-method",
+  ].includes(page.pageType);
+}
+
+const pageTypeToKind = {
+  "javascript-constructor": "constructors",
+  "javascript-static-accessor-property": "staticProperties",
+  "javascript-static-data-property": "staticProperties",
+  "javascript-static-method": "staticMethods",
+  "javascript-instance-accessor-property": "instanceProperties",
+  "javascript-instance-data-property": "instanceProperties",
+  "javascript-instance-method": "instanceMethods",
+};
 
 // Collect pages
-var source = {};
-source[mainObj] = await page.subpagesExpand('/en-US/docs/Web/JavaScript/Reference/Global_Objects/' + mainObj);
-if  (inheritance.indexOf("Function") > -1) {
-    source["iFunction"] = await page.subpagesExpand('/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function');
-}
-if  (inheritance.indexOf("Object") > -1) {
-    source["iObject"] = await page.subpagesExpand('/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object');
-}
+const inheritanceChain = [];
 
-var result = {};
-result[mainObj] = {
-    title: mainObj,
-    methods: [],
-    properties: [],
-    defaultOpened: true
-};
-if  (inheritance.indexOf("Function") > -1) {
-result['iFunction'] = {
-    title: 'Function',
-    methods: [],
-    properties: [],
-    defaultOpened: false
-};
-}
-if  (inheritance.indexOf("Object") > -1) {
-result['iObject'] = {
-    title: 'Object',
-    methods: [],
-    properties: [],
-    defaultOpened: false
-};
-}
-
-var pageList;
-var isObj;
-var includeme;
-
-for (var object in source) {
-    pageList = source[object];
-    if (object == "iObject") {
-        isObj = true;
+for (const obj of inheritance) {
+  const objPath = obj.replaceAll(".", "/");
+  const item = {
+    title:
+      obj === "%Base%"
+        ? "Object/Function"
+        : obj === "Intl/Segmenter/segment/Segments"
+        ? "Segments"
+        : obj,
+    subPath: objPath === "%Base%" ? "Object" : objPath,
+    defaultOpened: obj === mainObj,
+    constructors: [],
+    staticMethods: [],
+    staticProperties: [],
+    instanceMethods: [],
+    instanceProperties: [],
+  };
+  if (obj !== "%Base%") {
+    const pageList = await page.subpagesExpand(
+      `/en-US/docs/Web/JavaScript/Reference/Global_Objects/${objPath}`,
+    );
+    for (const page of pageList) {
+      if (!(page.pageType in pageTypeToKind)) {
+        continue;
+      }
+      item[pageTypeToKind[page.pageType]].push(page);
     }
-    for (aPage in pageList) {
-        if (isObj) {
-            includeme = containsTag(pageList[aPage], "prototype");
-        } else {
-            includeme = true;
-        }
-        if (containsTag(pageList[aPage], 'Property') && includeme) {
-            result[object].properties.push(pageList[aPage]);
-        }
-        if (containsTag(pageList[aPage], 'Method') && includeme) {
-            result[object].methods.push(pageList[aPage]);
-        }
+  } else {
+    const instanceProps = await page
+      .subpagesExpand(
+        "/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+      )
+      .filter((page) => isPrototypeMemberPage(page));
+    for (const page of instanceProps) {
+      item[pageTypeToKind[page.pageType]].push(page);
     }
+    const staticProps = await page
+      .subpagesExpand(
+        "/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+      )
+      .filter((page) => isPrototypeMemberPage(page));
+    for (const page of staticProps) {
+      item[pageTypeToKind[page.pageType].replace("instance", "static")].push(
+        page,
+      );
+    }
+  }
+  inheritanceChain.push(item);
 }
 
 // Output helper
+async function buildSublist(pages, title, opened) {
+  const getTitle =
+    locale === "en-US"
+      ? (page) => page.title
+      : (page) =>
+          page.translations().find((translation) => translation.locale === locale)
+            ?.title ?? page.title;
 
-var badges = {
-  ExperimentalBadge : await template("ExperimentalBadge"),
-  NonStandardBadge  : await template("NonStandardBadge"),
-  DeprecatedBadge   : await template("DeprecatedBadge"),
-  ObsoleteBadge     : await template("ObsoleteBadge"),
-}
+  const items = pages.map(async (aPage) => {
+    const url = aPage.url.replace("en-US", locale);
+    const title = getTitle(aPage);
+    const pageBadges = (await page.badges(aPage)).join("");
 
-function buildSublist(pages, title, opened) {
-  var result = '<li>';
-  if (opened) {
-    result = '<li data-default-state="open">';
-  }
-  result += '<a href="#"><strong>' + title + '</strong></a><ol>';
+    const start = rtlLocales.includes(locale) ? "<li><bdi>" : "<li>";
+    const end = rtlLocales.includes(locale) ? "</bdi></li>" : "</li>";
+    return `${start}${web.smartLink(
+      url,
+      null,
+      `<code>${title}</code>`,
+      aPage.slug,
+      slugStdlib,
+      "JSRef",
+    )}${pageBadges}${end}`;
+  });
 
-  for (var i in pages) {
-    var aPage = pages[i];
-    result += '<li>';
+  // Wait for all the links to be built
+  const resolvedItems = await Promise.all(items);
 
-    var url = aPage.url.replace('en-US', locale);
-    var title = aPage.title;
-
-    if (locale != 'en-US') {
-        aPage.translations.forEach(function(translation){
-            if(translation.locale === locale) {
-                url = translation.url;
-                title = translation.title;
-            }
-        });
-    }
-
-    if (containsTag(aPage, 'Experimental')) {
-        result += badges.ExperimentalBadge;
-    }
-
-    if (containsTag(aPage, 'Non-standard') || containsTag(aPage, 'Non Standard')) {
-        result += badges.NonStandardBadge;
-    }
-
-    if (containsTag(aPage, 'Deprecated')) {
-        result += badges.DeprecatedBadge;
-    }
-
-    if (containsTag(aPage, 'Obsolete')) {
-        result += badges.ObsoleteBadge;
-        result += '<s class="obsoleteElement">';
-    }
-
-    if (rtlLocales.indexOf(locale) != -1) {
-        result += '<bdi>';
-    }
-
-    if (slug == aPage.slug) {
-        result += '<em><code>' + aPage.title + '</code></em>'
-    } else {
-        result += '<a href="'
-               + url
-               + '"><code>' + title + '</code></a>';
-    }
-
-    if (rtlLocales.indexOf(locale) != -1) {
-        result += '</bdi>';
-    }
-
-    if (containsTag(aPage, 'Obsolete')) {
-        result += '</s>';
-    }
-
-    result += '</li>';
-  }
-
-  result += '</ol></li>';
+  const start = opened ? "<li><details open>" : "<li><details>";
+  const end = "</details></li>";
+  const result = `${start}<summary>${title}</summary></a><ol>${resolvedItems.join(
+    "",
+  )}</ol>${end}`;
 
   return result;
 }
 
-
-var resultTitle;
-var resultProperties;
-var resultMethods;
-var resultOpen;
-var len = 0;
-
 // Output
+async function renderOutput() {
+  let output =
+    '<section class="Quick_links" id="Quick_links" data-macro="JSRef"><ol>';
+  const link = web.smartLink(
+    slugStdlib,
+    null,
+    text.stdlib,
+    slugStdlib,
+    slugStdlib,
+    "JSRef",
+  );
+  output += `<li class="section">${link}</li>`;
 
-output  = '<section id="Quick_links"><ol>';
-output += '<li><strong><a href="'+slug_stdlib+'">'+text['stdlib']+'</a></strong></li>';
+  for (const [index, item] of inheritanceChain.entries()) {
+    const {
+      title,
+      subPath,
+      constructors,
+      staticMethods,
+      staticProperties,
+      instanceMethods,
+      instanceProperties,
+      defaultOpened,
+    } = item;
 
-    for (object in result) {
-        len++;
-        resultTitle      = result[object].title || '';
-        resultProperties = result[object].properties || '';
-        resultMethods    = result[object].methods || '';
-        resultOpen       = result[object].defaultOpened || '';
-
-        if (len == 2) {
-          output += '<li><strong>'+text['Inheritance']+'</strong></li>';
-        }
-
-        output += '<li><strong><a href="'+slug_stdlib + '/' + resultTitle +'"><code>'+resultTitle+'</code></a></strong></li>';
-
-        if (resultProperties.length > 0) {
-          output += buildSublist(resultProperties, text['Properties'], resultOpen);
-        }
-        if (resultMethods.length > 0) {
-          output += buildSublist(resultMethods, text['Methods'], resultOpen);
-        }
-
-        if (len == 1 && group.length > 0) {
-            output += '<li><strong>'+text['Related']+'</strong></li>';
-            for (var i = 0; i < group.length; i++) {
-              output += '<li><strong><a href="'+ slug_stdlib + '/' + group[i].replace(".", "/") +'"><code>'+group[i]+'</code></a></strong></li>';
-            }
-        }
-
+    if (index === 1) {
+      output += `<li class="section no-link">${text.Inheritance}</li>`;
     }
 
-output += '</ol></section>';
+    const link = web.smartLink(
+      `${slugStdlib}/${subPath}`,
+      null,
+      `<code>${title}</code>`,
+      null,
+      slugStdlib,
+      "JSRef",
+    );
+    output += `<li class="section">${link}</li>`;
+
+    if (constructors.length > 0) {
+      output += await buildSublist(
+        constructors,
+        text.Constructor,
+        defaultOpened,
+      );
+    }
+    if (staticMethods.length > 0) {
+      output += await buildSublist(
+        staticMethods,
+        text.StaticMethods,
+        defaultOpened,
+      );
+    }
+    if (staticProperties.length > 0) {
+      output += await buildSublist(
+        staticProperties,
+        text.StaticProperties,
+        defaultOpened,
+      );
+    }
+    if (instanceMethods.length > 0) {
+      output += await buildSublist(
+        instanceMethods,
+        text.InstanceMethods,
+        defaultOpened,
+      );
+    }
+    if (instanceProperties.length > 0) {
+      output += await buildSublist(
+        instanceProperties,
+        text.InstanceProperties,
+        defaultOpened,
+      );
+    }
+  }
+
+  if (group.length > 0) {
+    output += `<li class="section no-link">${text.Related}</li>`;
+    for (const groupItem of group) {
+      const link = web.smartLink(
+        `${slugStdlib}/${groupItem.replace(".", "/")}`,
+        null,
+        `<code>${groupItem}</code>`,
+        null,
+        slugStdlib,
+        "JSRef",
+      );
+      output += `<li class="section">${link}</li>`;
+    }
+  }
+
+  output += "</ol></section>";
+  return output;
 }
+
+const output = await renderOutput();
 %>
 
 <%-output%>

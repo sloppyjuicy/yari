@@ -11,15 +11,15 @@ which do not adhere to its formatting.
 
 - camelCase for everything
   - except for constants which are all caps snake case (e.g. `CONTENT_ROOT`)
-- abbreviations in all caps (e.g. `JSON.parse`, `findByURL`) unless they are
-  the start of a variable, then it's all lower case (e.g. `let url = 'earl';`)
+- abbreviations in all caps (e.g. `JSON.parse`, `findByURL`) unless they are the
+  start of a variable, then it's all lower case (e.g. `let url = 'earl';`)
 
 ## Code Structure
 
 Things should be defined in order in which they are used. E.g.:
 
 ```javascript
-const dependency = require("dependency");
+import dependency from "dependency";
 
 function doThing() {
   // ...

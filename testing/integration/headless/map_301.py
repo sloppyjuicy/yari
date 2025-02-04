@@ -227,8 +227,9 @@ SCL3_REDIRECT_URLS = list(
             url_test("/en/demos", "/en/docs/Web/Demos_of_open_web_technologies"),
             url_test(
                 "/{en,EN}/optimizing_your_pages_for_speculative_{PARSING,parsing,parsing/}",
-                "/en-US/docs/Glossary/speculative_parsing"
+                "/en-US/docs/Glossary/speculative_parsing",
             ),
+            url_test("{mdn,MDN}/{Contribute,contribute}", "/en-US/docs/MDN/Contribute"),
         )
     )
 )
@@ -463,67 +464,6 @@ GITHUB_IO_URLS = list(
             url_test(
                 "/samples/webgl/sample8/webgl.css",
                 "http://mdn.github.io/webgl-examples/tutorial/webgl.css",
-            ),
-        )
-    )
-)
-
-# Converted from SCL3 Apache files - move to untrusted domain
-MOZILLADEMOS_URLS = list(
-    flatten(
-        (
-            # https://mdn.mozillademos.org/
-            url_test(
-                "/samples/canvas-tutorial/images/backdrop.png",
-                "https://mdn.mozillademos.org/files/5395/backdrop.png",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/bg_gallery.png",
-                "https://mdn.mozillademos.org/files/5415/bg_gallery.png",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_1.jpg",
-                "https://mdn.mozillademos.org/files/5399/gallery_1.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_2.jpg",
-                "https://mdn.mozillademos.org/files/5401/gallery_2.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_3.jpg",
-                "https://mdn.mozillademos.org/files/5403/gallery_3.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_4.jpg",
-                "https://mdn.mozillademos.org/files/5405/gallery_4.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_5.jpg",
-                "https://mdn.mozillademos.org/files/5407/gallery_5.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_6.jpg",
-                "https://mdn.mozillademos.org/files/5409/gallery_6.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_7.jpg",
-                "https://mdn.mozillademos.org/files/5411/gallery_7.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/gallery_8.jpg",
-                "https://mdn.mozillademos.org/files/5413/gallery_8.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/picture_frame.png",
-                "https://mdn.mozillademos.org/files/242/Canvas_picture_frame.png",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/rhino.jpg",
-                "https://mdn.mozillademos.org/files/5397/rhino.jpg",
-            ),
-            url_test(
-                "/samples/canvas-tutorial/images/wallpaper.png",
-                "https://mdn.mozillademos.org/files/222/Canvas_createpattern.png",
             ),
         )
     )
@@ -990,12 +930,12 @@ MISC_REDIRECT_URLS = list(
     flatten(
         (
             url_test(
-                "/fr/{plus,plus/,plus/bookmarks,plus/bookmarks/,plus/deep-dives,plus/deep-dives/}",
+                "/fr/{plus,plus/,plus/collections,plus/collections/,plus/deep-dives,plus/deep-dives/}",
                 "/fr/",
                 status_code=302,
             ),
             url_test(
-                "/en-US/{plus,plus/,plus/bookmarks,plus/bookmarks/,plus/deep-dives,plus/deep-dives/}",
+                "/en-US/{plus,plus/,plus/collections,plus/collections/,plus/deep-dives,plus/deep-dives/}",
                 "/en-US/",
                 status_code=302,
             ),

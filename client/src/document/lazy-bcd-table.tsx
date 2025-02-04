@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { lazy, Suspense } from "react";
 import useSWR from "swr";
 
 import { DisplayH2, DisplayH3 } from "./ingredients/utils";
@@ -11,7 +11,16 @@ import { Loading } from "../ui/atoms/loading";
 // That means that when the lazy-loading happens, it only needs to lazy-load
 // the JS (and the JSON XHR fetch of course)
 import "./ingredients/browser-compatibility-table/index.scss";
-import { useLocale } from "../hooks";
+import { useLocale, useIsServer } from "../hooks";
+import NoteCard from "../ui/molecules/notecards";
+import type BCD from "@mdn/browser-compat-data/types";
+import { BCD_BASE_URL } from "../env";
+
+interface QueryJson {
+  query: string;
+  data: BCD.Identifier;
+  browsers: BCD.Browsers;
+}
 
 const BrowserCompatibilityTable = lazy(
   () =>
@@ -20,29 +29,59 @@ const BrowserCompatibilityTable = lazy(
     )
 );
 
-const isServer = typeof window === "undefined";
-
 export function LazyBrowserCompatibilityTable({
   id,
   title,
   isH3,
   query,
-  dataURL,
 }: {
   id: string;
   title: string;
   isH3: boolean;
   query: string;
-  dataURL: string | null;
 }) {
   return (
     <>
       {title && !isH3 && <DisplayH2 id={id} title={title} />}
       {title && isH3 && <DisplayH3 id={id} title={title} />}
-      {dataURL ? (
-        <LazyBrowserCompatibilityTableInner dataURL={dataURL} />
-      ) : (
-        <div className="notecard warning">
+      <LazyBrowserCompatibilityTableInner query={query} />
+    </>
+  );
+}
+
+function LazyBrowserCompatibilityTableInner({ query }: { query: string }) {
+  const locale = useLocale();
+  const isServer = useIsServer();
+
+  const { error, data } = useSWR(
+    query,
+    async (query) => {
+      const response = await fetch(
+        `${BCD_BASE_URL}/bcd/api/v0/current/${query}.json`
+      );
+      if (!response.ok) {
+        throw new Error(response.status.toString());
+      }
+      return (await response.json()) as QueryJson;
+    },
+    { revalidateOnFocus: false }
+  );
+
+  if (isServer) {
+    return (
+      <p>
+        BCD tables only load in the browser
+        <noscript>
+          {" "}
+          with JavaScript enabled. Enable JavaScript to view data.
+        </noscript>
+      </p>
+    );
+  }
+  if (error) {
+    if (error.message === "404") {
+      return (
+        <NoteCard type="warning">
           <p>
             No compatibility data found for <code>{query}</code>.<br />
             <a href="#on-github">Check for problems with this page</a> or
@@ -52,52 +91,30 @@ export function LazyBrowserCompatibilityTable({
             </a>
             .
           </p>
-        </div>
-      )}
-    </>
-  );
-}
-
-function LazyBrowserCompatibilityTableInner({ dataURL }: { dataURL: string }) {
-  const locale = useLocale();
-  const [bcdDataURL, setBCDDataURL] = useState("");
-
-  const { error, data } = useSWR(
-    bcdDataURL ? bcdDataURL : null,
-    async (url) => {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-      return await response.json();
-    },
-    { revalidateOnFocus: false }
-  );
-
-  useEffect(() => {
-    setBCDDataURL(dataURL);
-  }, [dataURL]);
-
-  if (isServer) {
-    return <p>BCD tables only load in the browser</p>;
-  }
-  if (!data && !error) {
-    return <Loading />;
-  }
-  if (error) {
+        </NoteCard>
+      );
+    }
     return <p>Error loading BCD data</p>;
+  }
+  if (!data) {
+    return <Loading />;
   }
 
   return (
     <ErrorBoundary>
       <Suspense fallback={<Loading message="Loading BCD table" />}>
-        <BrowserCompatibilityTable locale={locale} {...data} />
+        <BrowserCompatibilityTable
+          locale={locale}
+          query={data.query}
+          data={data.data}
+          browsers={data.browsers}
+        />
       </Suspense>
     </ErrorBoundary>
   );
 }
 
-type ErrorBoundaryProps = {};
+type ErrorBoundaryProps = { children?: React.ReactNode };
 type ErrorBoundaryState = {
   error: Error | null;
 };
@@ -122,7 +139,7 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <div className="notecard negative">
+        <NoteCard type="negative">
           <p>
             <strong>Error loading browser compatibility table</strong>
           </p>
@@ -151,7 +168,7 @@ class ErrorBoundary extends React.Component<
               {this.state.error.toString()}
             </small>
           </p>
-        </div>
+        </NoteCard>
       );
     }
 

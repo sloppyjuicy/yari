@@ -7,6 +7,10 @@ node_modules/
 
 # testing
 /coverage
+/mdn/content/
+
+# pwa
+/client/public/service-worker.js
 
 # misc
 .DS_Store
@@ -17,15 +21,26 @@ node_modules/
 /.env
 /client/.env
 __pycache__/
+.idea/
 
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /kumascript/coverage/
 /kumascript/node_modules/
 /testing/node_modules/
-/client/build/
+/build/*.js.map
+/client/build
+/client/src/**/*.js.map
+/content/*.js.map
+/filecheck/*.js.map
+/kumascript/*.js.map
+/markdown/*.js.map
+/server/*.js.map
 /ssr/dist/
+/ssr/*.js.map
+/tool/*.js.map
 
 # These are an effect of the dumper still producing all locales
 # We haven't decided what to do with them but for now we're *not*
@@ -72,6 +87,16 @@ md-conversion-problems-report*.md
 
 testing/content/files/en-us/_githistory.json
 testing/translated-content/files/**/_githistory.json
+
+testing/content/files/en-us/markdown/tool/h2m/index.md
+testing/content/files/en-us/markdown/tool/m2h/index.html
 # eslintcache
 client/.eslintcache
 popularities.json
+source-commit.json
+source-commit-invalid-report.txt
+
+client/src/.linaria_cache
+ssr/.linaria-cache/
+
+client/venv

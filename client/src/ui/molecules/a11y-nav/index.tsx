@@ -1,11 +1,12 @@
 import { useLocation } from "react-router-dom";
 
-import { useGA } from "../../../ga-context";
+import { useGleanClick } from "../../../telemetry/glean-context";
 
 import "./index.scss";
+import { A11Y_MENU } from "../../../telemetry/constants";
 
 export function A11yNav() {
-  const ga = useGA();
+  const gleanClick = useGleanClick();
   const { pathname } = useLocation();
   const showLangMenuSkiplink = pathname.includes("/docs/");
 
@@ -16,14 +17,8 @@ export function A11yNav() {
    */
   function sendAccessMenuItemClick(event) {
     const action = new URL(event.target.href).hash;
-    const label = event.target.textContent;
 
-    ga("send", {
-      hitType: "event",
-      eventCategory: "Access Links",
-      eventAction: action,
-      eventLabel: label,
-    });
+    gleanClick(`${A11Y_MENU}: click ${action}`);
   }
 
   return (
@@ -38,10 +33,11 @@ export function A11yNav() {
           Skip to main content
         </a>
       </li>
+
       <li>
         <a
           id="skip-search"
-          href="#main-q"
+          href="#top-nav-search-input"
           onClick={sendAccessMenuItemClick}
           onContextMenu={sendAccessMenuItemClick}
         >
@@ -52,7 +48,7 @@ export function A11yNav() {
         <li>
           <a
             id="skip-select-language"
-            href="#select-language"
+            href="#languages-switcher-button"
             onClick={sendAccessMenuItemClick}
             onContextMenu={sendAccessMenuItemClick}
           >

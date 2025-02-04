@@ -1,17 +1,16 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { annotate, annotationGroup } from "rough-notation";
 import { RoughAnnotation } from "rough-notation/lib/model";
 import { diffWords } from "diff";
 
-import { CRUD_MODE, CRUD_MODE_HOSTNAMES } from "../../constants";
+import { WRITER_MODE, WRITER_MODE_HOSTNAMES } from "../../env";
 import { humanizeFlawName } from "../../flaw-utils";
 import { useDocumentURL } from "../hooks";
 import {
   Doc,
   BrokenLink,
   MacroErrorMessage,
-  BadBCDLinkFlaw,
   ImageReferenceFlaw,
   ImageWidthFlaw,
   GenericFlaw,
@@ -21,7 +20,7 @@ import {
   HeadingLinksFlaw,
   TranslationDifferenceFlaw,
   UnsafeHTMLFlaw,
-} from "../types";
+} from "../../../../libs/types/document";
 import "./flaws.scss";
 
 interface FlawCount {
@@ -120,9 +119,10 @@ export function ToggleDocumentFlaws({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [show, toggle] = useReducer((v) => !v, location.hash === FLAWS_HASH);
   const rootElement = useRef<HTMLDivElement>(null);
   const isInitialRender = useRef(true);
+
+  const show = location.hash === FLAWS_HASH;
 
   useEffect(() => {
     if (isInitialRender.current && show && rootElement.current) {
@@ -131,14 +131,13 @@ export function ToggleDocumentFlaws({
     isInitialRender.current = false;
   }, [show]);
 
-  useEffect(() => {
-    const hasShowHash = window.location.hash === FLAWS_HASH;
-    if (show && !hasShowHash) {
-      navigate(location.pathname + location.search + FLAWS_HASH);
-    } else if (!show && hasShowHash) {
+  function toggle() {
+    if (show) {
       navigate(location.pathname + location.search);
+    } else {
+      navigate(location.pathname + location.search + FLAWS_HASH);
     }
-  }, [location, navigate, show]);
+  }
 
   const flawsCounts = Object.entries(doc.flaws)
     .map(([name, actualFlaws]) => ({
@@ -159,8 +158,8 @@ export function ToggleDocumentFlaws({
       el.href = !allFlaws
         ? "/favicon-48x48-flawless.png"
         : allFlaws === allFixableFlaws
-        ? "/favicon-48x48-flaws-fixable.png"
-        : "/favicon-48x48-flaws.png";
+          ? "/favicon-48x48-flaws-fixable.png"
+          : "/favicon-48x48-flaws.png";
     }
   }, [doc.flaws]);
 
@@ -206,8 +205,8 @@ function Flaws({
   flaws: FlawCount[];
   reloadPage: () => void;
 }) {
-  if (!CRUD_MODE) {
-    throw new Error("This shouldn't be used in non-development builds");
+  if (!WRITER_MODE) {
+    throw new Error("This shouldn't be used without WRITER_MODE=true");
   }
 
   const fixableFlaws = Object.values(doc.flaws)
@@ -218,7 +217,7 @@ function Flaws({
     })
     .flat();
 
-  const isReadOnly = !CRUD_MODE_HOSTNAMES.includes(window.location.hostname);
+  const isReadOnly = !WRITER_MODE_HOSTNAMES.includes(window.location.hostname);
 
   // Note! This will work on Windows. The filename can be sent to
   // the server in POSIX style and the `open-editor` program will make
@@ -229,20 +228,19 @@ function Flaws({
     <div id="document-flaws">
       {!!fixableFlaws.length && !isReadOnly && fixableFlaws.length > 0 && (
         <>
-          {doc.isMarkdown ? (
+          {doc.isMarkdown && (
             <small>
-              Automatic fixing fixable flaws not yet enabled for Markdown
+              Automatic fixing fixable flaws is experimental for Markdown
               documents. See{" "}
               <a href="https://github.com/mdn/yari/issues/4333">
                 mdn/yari#4333
               </a>
             </small>
-          ) : (
-            <FixableFlawsAction
-              count={fixableFlaws.length}
-              reloadPage={reloadPage}
-            />
           )}
+          <FixableFlawsAction
+            count={fixableFlaws.length}
+            reloadPage={reloadPage}
+          />
         </>
       )}{" "}
       {flaws.map((flaw) => {
@@ -252,22 +250,15 @@ function Flaws({
               <BrokenLinks
                 key="broken_links"
                 sourceFilePath={filePath}
-                links={doc.flaws.broken_links}
+                links={doc.flaws.broken_links as BrokenLink[]}
                 isReadOnly={isReadOnly}
-              />
-            );
-          case "bad_bcd_links":
-            return (
-              <BadBCDLinks
-                key="bad_bcd_links"
-                links={doc.flaws.bad_bcd_links}
               />
             );
           case "bad_bcd_queries":
             return (
               <BadBCDQueries
                 key="bad_bcd_queries"
-                flaws={doc.flaws.bad_bcd_queries}
+                flaws={doc.flaws.bad_bcd_queries as BadBCDQueryFlaw[]}
               />
             );
           case "bad_pre_tags":
@@ -275,7 +266,7 @@ function Flaws({
               <BadPreTag
                 key="bad_pre_tags"
                 sourceFilePath={filePath}
-                flaws={doc.flaws.bad_pre_tags}
+                flaws={doc.flaws.bad_pre_tags as BadPreTagFlaw[]}
                 isReadOnly={isReadOnly}
               />
             );
@@ -284,7 +275,7 @@ function Flaws({
               <Macros
                 key="macros"
                 sourceFilePath={filePath}
-                flaws={doc.flaws.macros}
+                flaws={doc.flaws.macros as MacroErrorMessage[]}
                 isReadOnly={isReadOnly}
               />
             );
@@ -293,7 +284,7 @@ function Flaws({
               <Images
                 key="images"
                 sourceFilePath={filePath}
-                images={doc.flaws.images}
+                images={doc.flaws.images as ImageReferenceFlaw[]}
                 isReadOnly={isReadOnly}
               />
             );
@@ -302,7 +293,7 @@ function Flaws({
               <ImageWidths
                 key="image_widths"
                 sourceFilePath={filePath}
-                flaws={doc.flaws.image_widths}
+                flaws={doc.flaws.image_widths as ImageWidthFlaw[]}
                 isReadOnly={isReadOnly}
               />
             );
@@ -311,25 +302,36 @@ function Flaws({
               <HeadingLinks
                 key="heading_links"
                 sourceFilePath={filePath}
-                flaws={doc.flaws.heading_links}
+                flaws={doc.flaws.heading_links as HeadingLinksFlaw[]}
                 isReadOnly={isReadOnly}
               />
             );
           case "unsafe_html":
             return (
-              <UnsafeHTML key="unsafe_html" flaws={doc.flaws.unsafe_html} />
+              <UnsafeHTML
+                key="unsafe_html"
+                flaws={doc.flaws.unsafe_html as UnsafeHTMLFlaw[]}
+              />
             );
           case "translation_differences":
             return (
               <TranslationDifferences
                 key="translation_differences"
-                flaws={doc.flaws.translation_differences}
+                flaws={
+                  doc.flaws
+                    .translation_differences as TranslationDifferenceFlaw[]
+                }
               />
             );
           case "sectioning":
-            return <Sectioning key="sectioning" flaws={doc.flaws.sectioning} />;
+            return (
+              <Sectioning
+                key="sectioning"
+                flaws={doc.flaws.sectioning as SectioningFlaw[]}
+              />
+            );
           default:
-            throw new Error(`Unknown flaw check '${flaw.name}'`);
+            return <Unknown key="unknown" flaws={doc.flaws.unknown || []} />;
         }
       })}
     </div>
@@ -529,10 +531,10 @@ function BrokenLinks({
   );
 }
 
-function BadBCDQueries({ flaws }: { flaws: BadBCDQueryFlaw[] }) {
+function Unknown({ flaws }: { flaws: GenericFlaw[] }) {
   return (
-    <div className="flaw flaw__bad_bcd_queries">
-      <h3>{humanizeFlawName("bad_bcd_queries")}</h3>
+    <div className="flaw flaw__unkown">
+      <h3>{humanizeFlawName("unknown")}</h3>
       <ul>
         {flaws.map((flaw) => (
           <li key={flaw.id}>
@@ -543,16 +545,14 @@ function BadBCDQueries({ flaws }: { flaws: BadBCDQueryFlaw[] }) {
     </div>
   );
 }
-
-function BadBCDLinks({ links }: { links: BadBCDLinkFlaw[] }) {
+function BadBCDQueries({ flaws }: { flaws: BadBCDQueryFlaw[] }) {
   return (
-    <div className="flaw flaw__bad_bcd_links">
-      <h3>{humanizeFlawName("bad_bcd_links")}</h3>
+    <div className="flaw flaw__bad_bcd_queries">
+      <h3>{humanizeFlawName("bad_bcd_queries")}</h3>
       <ul>
-        {links.map((link) => (
-          <li key={link.slug}>
-            In <code>{link.query}</code> under key <code>{link.key}</code> can't
-            find document: <code>{link.slug}</code>
+        {flaws.map((flaw) => (
+          <li key={flaw.id}>
+            <code>{flaw.explanation}</code>
           </li>
         ))}
       </ul>
@@ -706,7 +706,9 @@ function Macros({
     <div className="flaw flaw__macros">
       <h3>{humanizeFlawName("macros")}</h3>
       {flaws.map((flaw) => {
-        const inPrerequisiteMacro = !flaw.filepath.includes(sourceFilePath);
+        const inPrerequisiteMacro = flaw.filepath
+          ? !flaw.filepath.includes(sourceFilePath)
+          : false;
         return (
           <details
             key={flaw.id}

@@ -1,15 +1,16 @@
 import React from "react";
-import { Link, useParams, Routes, Route } from "react-router-dom";
+import { Link, Routes, Route } from "react-router-dom";
 import useSWR from "swr";
 
 import "./index.scss";
 
 import { Loading } from "../ui/atoms/loading";
-import { PageContentContainer } from "../ui/atoms/page-content";
+import { MainContentContainer } from "../ui/atoms/page-content";
 
 import { TranslationDifferences } from "./differences";
 import { MissingTranslations } from "./missing";
 import { TranslationDashboard } from "./dashboard";
+import { useLocale } from "../hooks";
 
 interface Locale {
   locale: string;
@@ -39,7 +40,7 @@ export default function Translations() {
 }
 
 function PickLocale() {
-  const { locale } = useParams();
+  const locale = useLocale();
   React.useEffect(() => {
     let title = "All translations";
     if (locale.toLowerCase() !== "en-us") {
@@ -91,9 +92,9 @@ function PickLocale() {
 
 function Container({ children }: { children: React.ReactNode }) {
   return (
-    <div className="all-translations">
-      <PageContentContainer>{children}</PageContentContainer>
-    </div>
+    <MainContentContainer className="all-translations" standalone={true}>
+      {children}
+    </MainContentContainer>
   );
 }
 

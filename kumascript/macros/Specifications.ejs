@@ -13,11 +13,18 @@ Example calls
 
 */
 
-var query = $0 || env['browser-compat'];
-if (!query) {
-  throw new Error("No first query argument or 'browser-compat' front-matter value passed");
+if ($0) {
+  mdn.deprecatedParams(`Calling the Specifications macro with any arguments is
+  deprecated; instead use either the 'browser-compat' or 'spec-urls'
+  front-matter key.`);
 }
-var output = `<div class="bc-specs" data-bcd-query="${query}">
+
+var query = $0 || env['browser-compat'];
+var specURLs = env['spec-urls'] || "";
+if (!query && !specURLs) {
+  throw new Error("No first query argument or 'browser-compat' or 'spec-urls' front-matter value passed");
+}
+var output = `<div class="bc-specs" data-bcd-query="${query}" data-spec-urls="${specURLs}">
   If you're able to see this, something went wrong on this page.
 </div>`;
 %>
