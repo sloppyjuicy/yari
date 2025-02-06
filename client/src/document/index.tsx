@@ -1,27 +1,29 @@
 import React from "react";
-import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useSWR, { mutate } from "swr";
 
-import { CRUD_MODE } from "../constants";
-import { useGA } from "../ga-context";
-import { useDocumentURL, useCopyExamplesToClipboard } from "./hooks";
-import { Doc } from "./types";
+import { WRITER_MODE, PLACEMENT_ENABLED } from "../env";
+import { useIsServer, useLocale } from "../hooks";
+
+import { useDocumentURL, useDecorateCodeExamples, useRunSample } from "./hooks";
+import { Doc } from "../../../libs/types/document";
 // Ingredients
-import { Prose, ProseWithHeading } from "./ingredients/prose";
+import { Prose } from "./ingredients/prose";
 import { LazyBrowserCompatibilityTable } from "./lazy-bcd-table";
 import { SpecificationSection } from "./ingredients/spec-section";
 
 // Misc
 // Sub-components
-import { Breadcrumbs } from "../ui/molecules/breadcrumbs";
-import { LanguageToggle } from "../ui/molecules/language-toggle";
+import { TopNavigation } from "../ui/organisms/top-navigation";
+import { ArticleActionsContainer } from "../ui/organisms/article-actions-container";
 import { LocalizedContentNote } from "./molecules/localized-content-note";
+import { OfflineStatusBar } from "../ui/molecules/offline-status-bar";
 import { TOC } from "./organisms/toc";
 import { RenderSideBar } from "./organisms/sidebar";
-import { RetiredLocaleNote } from "./molecules/retired-locale-note";
 import { MainContentContainer } from "../ui/atoms/page-content";
 import { Loading } from "../ui/atoms/loading";
-import { Metadata } from "./organisms/metadata";
+import { ArticleFooter } from "./organisms/article-footer";
+import { PageNotFound } from "../page-not-found";
 
 import "./index.scss";
 
@@ -32,49 +34,97 @@ import "./index.scss";
 // code could come with its own styling rather than it having to be part of the
 // main bundle all the time.
 import "./interactive-examples.scss";
+import "../lit/interactive-example.global.scss";
+import { DocumentSurvey } from "../ui/molecules/document-survey";
+import { useIncrementFrequentlyViewed } from "../plus/collections/frequently-viewed";
+import { useInteractiveExamplesActionHandler as useInteractiveExamplesTelemetry } from "../telemetry/interactive-examples";
+import { BottomBanner, SidePlacement } from "../ui/organisms/placement";
+import { BaselineIndicator } from "./baseline-indicator";
+import { PlayQueue } from "../playground/queue";
+import { useGleanClick } from "../telemetry/glean-context";
+import { CLIENT_SIDE_NAVIGATION } from "../telemetry/constants";
+// import { useUIStatus } from "../ui-context";
 
 // Lazy sub-components
 const Toolbar = React.lazy(() => import("./toolbar"));
+const MathMLPolyfillMaybe = React.lazy(() => import("./mathml-polyfill"));
+
+export class HTTPError extends Error {
+  public readonly status: number;
+  public readonly url: string;
+  public readonly text: string;
+  constructor(status: number, url: string, text: string) {
+    super(`${status} on ${url}: ${text}`);
+    this.status = status;
+    this.url = url;
+    this.text = text;
+  }
+}
 
 export function Document(props /* TODO: define a TS interface for this */) {
-  const ga = useGA();
+  React.useEffect(() => {
+    import("../lit/interactive-example.js");
+  }, []);
+
+  const gleanClick = useGleanClick();
+  const isServer = useIsServer();
+
   const mountCounter = React.useRef(0);
   const documentURL = useDocumentURL();
-  const { locale } = useParams();
-  const [searchParams] = useSearchParams();
+  const locale = useLocale();
 
   const navigate = useNavigate();
+
+  const previousDoc = React.useRef(null);
+
+  const fallbackData =
+    props.doc && props.doc.mdn_url.toLowerCase() === documentURL.toLowerCase()
+      ? props.doc
+      : null;
 
   const dataURL = `${documentURL}/index.json`;
   const { data: doc, error } = useSWR<Doc>(
     dataURL,
     async (url) => {
       const response = await fetch(url);
+
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(`${response.status} on ${url}: Page not found`);
+        switch (response.status) {
+          case 404:
+            throw new HTTPError(response.status, url, "Page not found");
+
+          case 504:
+            if (previousDoc.current) {
+              return previousDoc.current;
+            }
         }
+
         const text = await response.text();
-        throw new Error(`${response.status} on ${url}: ${text}`);
+        throw new HTTPError(response.status, url, text);
       }
+
       const { doc } = await response.json();
+      previousDoc.current = doc;
+
       if (response.redirected) {
         navigate(doc.mdn_url);
       }
+
       return doc;
     },
     {
-      initialData:
-        props.doc &&
-        props.doc.mdn_url.toLowerCase() === documentURL.toLowerCase()
-          ? props.doc
-          : null,
-      revalidateOnFocus: CRUD_MODE,
-      refreshInterval: CRUD_MODE ? 500 : 0,
+      fallbackData,
+      revalidateOnFocus: WRITER_MODE,
+      revalidateOnMount: !fallbackData,
+      refreshInterval: WRITER_MODE ? 500 : 0,
     }
   );
 
-  useCopyExamplesToClipboard(doc);
+  useIncrementFrequentlyViewed(doc);
+  useRunSample(doc);
+  //useCollectSample(doc);
+  useDecorateCodeExamples(doc);
+  useInteractiveExamplesTelemetry();
 
   React.useEffect(() => {
     if (!doc && !error) {
@@ -89,22 +139,15 @@ export function Document(props /* TODO: define a TS interface for this */) {
   React.useEffect(() => {
     if (doc && !error) {
       if (mountCounter.current > 0) {
-        // 'dimension19' means it's a client-side navigation.
-        // I.e. not the initial load but the location has now changed.
-        // Note that in local development, where you use `localhost:3000`
-        // this will always be true because it's always client-side navigation.
-        ga("set", "dimension19", "Yes");
-        ga("send", {
-          hitType: "pageview",
-          location: window.location.toString(),
-        });
+        const location = window.location.toString();
+        gleanClick(`${CLIENT_SIDE_NAVIGATION}: ${location}`);
       }
 
       // By counting every time a document is mounted, we can use this to know if
       // a client-side navigation happened.
       mountCounter.current++;
     }
-  }, [ga, doc, error]);
+  }, [gleanClick, doc, error]);
 
   React.useEffect(() => {
     const location = document.location;
@@ -132,91 +175,95 @@ export function Document(props /* TODO: define a TS interface for this */) {
       }
     }
   }, []);
+  // const { setToastData } = useUIStatus();
 
   if (!doc && !error) {
-    return <Loading minHeight={600} message="Loading document..." />;
+    return <Loading minHeight={800} message="Loading document..." />;
   }
 
   if (error) {
-    return <LoadingError error={error} />;
+    return (
+      <>
+        <div className="sticky-header-container">
+          <TopNavigation />
+        </div>
+        <MainContentContainer>
+          {error instanceof HTTPError && error.status === 404 ? (
+            <PageNotFound />
+          ) : (
+            <LoadingError error={error} />
+          )}
+        </MainContentContainer>
+      </>
+    );
   }
 
   if (!doc) {
     return null;
   }
 
-  const translations = doc.other_translations || [];
-
-  const isServer = typeof window === "undefined";
-
   return (
     <>
-      {/* if we have either breadcrumbs or translations for the current page,
-      continue rendering the section */}
-      {(doc.parents || !!translations.length) && (
-        <div className="breadcrumb-locale-container">
-          {doc.parents && <Breadcrumbs parents={doc.parents} />}
-          {translations && !!translations.length && (
-            <LanguageToggle locale={locale} translations={translations} />
-          )}
+      <div className="sticky-header-container">
+        <TopNavigation />
+        <ArticleActionsContainer doc={doc} />
+      </div>
+      {/* only include this if we are not server-side rendering */}
+      {!isServer && <OfflineStatusBar />}
+      {doc.isTranslated && (
+        <div className="container">
+          <LocalizedContentNote isActive={doc.isActive} locale={locale} />
         </div>
       )}
+      <div className="main-wrapper">
+        <div className="sidebar-container">
+          <RenderSideBar doc={doc} />
+          <div className="toc-container">
+            <aside className="toc">
+              <nav>{doc.toc && !!doc.toc.length && <TOC toc={doc.toc} />}</nav>
+            </aside>
+            {PLACEMENT_ENABLED && <SidePlacement />}
+          </div>
+        </div>
 
-      {doc.isTranslated ? (
-        <LocalizedContentNote isActive={doc.isActive} locale={locale} />
-      ) : (
-        searchParams.get("retiredLocale") && <RetiredLocaleNote />
-      )}
+        <MainContentContainer>
+          {!isServer && WRITER_MODE && !props.isPreview && doc.isActive && (
+            <React.Suspense fallback={<Loading message={"Loading toolbar"} />}>
+              <Toolbar
+                doc={doc}
+                reloadPage={() => {
+                  mutate(dataURL);
+                }}
+              />
+            </React.Suspense>
+          )}
 
-      {doc.toc && !!doc.toc.length && <TOC toc={doc.toc} />}
-
-      <MainContentContainer>
-        {!isServer && CRUD_MODE && !props.isPreview && doc.isActive && (
-          <React.Suspense fallback={<Loading message={"Loading toolbar"} />}>
-            <Toolbar
-              doc={doc}
-              reloadPage={() => {
-                mutate(dataURL);
-              }}
-            />
-          </React.Suspense>
-        )}
-        <article className="main-page-content" lang={doc.locale}>
-          <h1>{doc.title}</h1>
-          <RenderDocumentBody doc={doc} />
-        </article>
-        <Metadata doc={doc} locale={locale} />
-      </MainContentContainer>
-
-      {doc.sidebarHTML && <RenderSideBar doc={doc} />}
+          {!isServer && doc.hasMathML && (
+            <React.Suspense fallback={null}>
+              <MathMLPolyfillMaybe />
+            </React.Suspense>
+          )}
+          <article className="main-page-content" lang={doc.locale}>
+            <header>
+              <h1>{doc.title}</h1>
+              {doc.baseline && <BaselineIndicator status={doc.baseline} />}
+            </header>
+            <DocumentSurvey doc={doc} />
+            <RenderDocumentBody doc={doc} />
+          </article>
+          <ArticleFooter doc={doc} />
+        </MainContentContainer>
+        {false && <PlayQueue standalone={true} />}
+      </div>
+      <BottomBanner />
     </>
   );
 }
 
-/** These prose sections should be rendered WITHOUT a heading. */
-const PROSE_NO_HEADING = ["short_description", "overview"];
-
-function RenderDocumentBody({ doc }) {
+export function RenderDocumentBody({ doc }) {
   return doc.body.map((section, i) => {
     if (section.type === "prose") {
-      // Only exceptional few should use the <Prose/> component,
-      // as opposed to <ProseWithHeading/>.
-      if (!section.value.id || PROSE_NO_HEADING.includes(section.value.id)) {
-        return (
-          <Prose
-            key={section.value.id || `prose${i}`}
-            section={section.value}
-          />
-        );
-      } else {
-        return (
-          <ProseWithHeading
-            key={section.value.id}
-            id={section.value.id}
-            section={section.value}
-          />
-        );
-      }
+      return <Prose key={section.value.id} section={section.value} />;
     } else if (section.type === "browser_compatibility") {
       return (
         <LazyBrowserCompatibilityTable
@@ -237,22 +284,30 @@ function RenderDocumentBody({ doc }) {
 
 function LoadingError({ error }) {
   return (
-    <div className="page-content-container loading-error">
-      <h3>Loading Error</h3>
-      {error instanceof window.Response ? (
+    <div className="main-wrapper">
+      <div id="content" className="main-content loading-error">
+        <h3>Loading Error</h3>
+        {error instanceof window.Response ? (
+          <p>
+            <b>{error.status}</b> on <b>{error.url}</b>
+            <br />
+            <small>{error.statusText}</small>
+          </p>
+        ) : (
+          <pre>{error.toString()}</pre>
+        )}
         <p>
-          <b>{error.status}</b> on <b>{error.url}</b>
-          <br />
-          <small>{error.statusText}</small>
+          <button
+            className="button"
+            type="button"
+            onClick={() => {
+              window.location.reload();
+            }}
+          >
+            Try reloading the page
+          </button>
         </p>
-      ) : (
-        <p>
-          <code>{error.toString()}</code>
-        </p>
-      )}
-      <p>
-        <a href=".">Try reloading the page</a>
-      </p>
+      </div>
     </div>
   );
 }

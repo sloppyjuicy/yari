@@ -6,16 +6,17 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 35
+    groups:
+      sentry:
+        patterns:
+          - "@sentry/*"
+      types:
+        patterns:
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
-      # Need manual updates with "resolutions" in package.json
-      # to property hoist versions from react-scripts
-      - dependency-name: "webpack"
-      - dependency-name: "eslint"
-
-      # The @storybook dependencies come out a lot.
-      # https://github.com/mdn/yari/pulls?q=is%3Apr++is%3Aclosed+storybook+
-      # We don't use storybook at the moment.
-      - dependency-name: "@storybook/*"
       # Temporarily disable updates to Dinocons
       - dependency-name: "@mdn/dinocons"
 
@@ -28,14 +29,52 @@ updates:
     directory: "/deployer"
     schedule:
       interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "pip"
     directory: "/testing/integration"
     schedule:
       interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: npm
-    directory: "/deployer/aws-lambda/content-origin-request"
+    directory: "/client/pwa"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/cloud-function"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/locale-utils"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/pong"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/slug-utils"
     schedule:
       interval: daily
     open-pull-requests-limit: 10

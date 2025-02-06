@@ -1,83 +1,106 @@
-@use "sass:math";
+@use "../ui/vars" as *;
 
-@import "~@mdn/minimalist/sass/vars/mdn-web-docs-palette";
-@import "~@mdn/minimalist/sass/vars/layout";
-@import "~@mdn/minimalist/sass/vars/typography";
+article.settings {
+  display: block;
+  margin: auto;
+  max-width: 60em;
+  padding: 1rem;
+  width: min(90vw, 40em);
 
-.page-content-container.account-settings {
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-
-  @media #{$mq-large-desktop-and-up} {
-    margin: ($base-spacing) auto;
+  h3 {
+    margin-top: 0;
   }
 
-  h1 {
-    margin: $base-spacing 0;
+  section {
+    padding: 1rem;
+
+    &.field-group,
+    &.setting-row {
+      padding: 0;
+    }
   }
 
   .field-group {
-    margin: math.div($base-spacing, 2) 0;
-  }
+    ul {
+      padding: 0;
 
-  .notecard {
-    @media #{$mq-small-desktop-and-up} {
-      max-width: 80%;
+      li {
+        display: grid;
+        gap: 0 1rem;
+        grid-template-columns: 1fr 5em;
+
+        section {
+          margin: 0.125rem 0;
+
+          &:hover,
+          &:target {
+            background-color: var(--background-information);
+            border-radius: 0.25rem;
+          }
+        }
+
+        .setting-row {
+          align-items: center;
+          display: flex;
+          gap: 1rem;
+          justify-content: space-between;
+        }
+
+        p {
+          margin: 0 0 1rem;
+
+          &:first-child {
+            margin-top: 0;
+          }
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+
+        span {
+          font-size: 0.8rem;
+          grid-column: 1/2;
+          line-height: 1.2em;
+          padding-top: 0.3em;
+        }
+
+        .loading,
+        .switch {
+          align-self: center;
+          grid-column: 2/3;
+          grid-row: 1/3;
+          justify-self: end;
+        }
+
+        button,
+        .manage {
+          align-self: center;
+          background-color: var(--background-primary);
+          border: 1px solid var(--text-primary);
+          border-radius: var(--elem-radius);
+          color: var(--text-link);
+          font-size: 0.8rem;
+          grid-column: 2/3;
+          grid-row: 1/3;
+          height: max-content;
+          justify-self: end;
+          min-width: 10rem;
+          padding: 0.5rem 1rem;
+          text-align: center;
+          width: max-content;
+
+          &:hover {
+            background-color: var(--background-secondary);
+          }
+        }
+
+        button[disabled] {
+          background-color: var(--background-secondary);
+          border: 1px solid var(--text-secondary);
+          color: var(--text-secondary);
+        }
+      }
     }
   }
-
-  .confirm-account-closure {
-    .button-container {
-      display: flex;
-      gap: $base-spacing;
-    }
-  }
-}
-
-.account-settings-panels-container {
-  @media #{$mq-tablet-and-up} {
-    display: flex;
-    gap: $base-spacing;
-    justify-content: space-between;
-    margin: $base-spacing 0;
-    max-width: $max-width-small-desktop;
-    width: 100%;
-  }
-}
-
-.settings-form {
-  margin: math.div($base-spacing, 2) 0 ($base-spacing * 2);
-
-  @media #{$mq-tablet-and-up} {
-    margin: 0;
-  }
-}
-
-.close-account {
-  h3 {
-    margin-top: math.div($base-spacing, 2);
-  }
-
-  h4,
-  p {
-    margin-bottom: math.div($base-spacing, 2);
-  }
-
-  h4 {
-    font-family: $heading-font-family;
-    font-size: $small-medium-font-size-mobile;
-
-    @media #{$mq-tablet-and-up} {
-      font-size: $small-medium-font-size;
-    }
-  }
-}
-
-.settings-form,
-.close-account {
-  border: 1px solid $mdn-neutral500;
-  border-top: 5px solid $mdn-blue700;
-  flex-basis: 45%;
-  padding: $base-spacing;
 }

@@ -1,26 +1,20 @@
+import { useMemo } from "react";
 import { DisplayH2, DisplayH3 } from "./utils";
 
-export function Prose({ section }) {
-  return <div dangerouslySetInnerHTML={{ __html: section.content }} />;
-}
+export function Prose({ section }: { section: any }) {
+  const { id } = section;
+  const html = useMemo(() => ({ __html: section.content }), [section.content]);
 
-export function ProseWithHeading({ id, section }) {
+  if (!id) {
+    return <div className="section-content" dangerouslySetInnerHTML={html} />;
+  }
+
+  const DisplayHx = section.isH3 ? DisplayH3 : DisplayH2;
+
   return (
-    <>
-      {section.isH3 ? (
-        <DisplayH3
-          id={id}
-          title={section.title}
-          titleAsText={section.titleAsText}
-        />
-      ) : (
-        <DisplayH2
-          id={id}
-          title={section.title}
-          titleAsText={section.titleAsText}
-        />
-      )}
-      <Prose section={section} />
-    </>
+    <section aria-labelledby={id}>
+      <DisplayHx id={id} title={section.title} />
+      <div className="section-content" dangerouslySetInnerHTML={html} />
+    </section>
   );
 }

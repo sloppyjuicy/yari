@@ -3,23 +3,49 @@
     "stylelint-config-recommended",
     "stylelint-config-sass-guidelines",
     "stylelint-a11y/recommended",
-    "stylelint-prettier/recommended"
+    "stylelint-prettier/recommended",
+    "stylelint-config-prettier"
   ],
-  "plugins": ["stylelint-scss"],
+  "plugins": ["stylelint-scss", "stylelint-order"],
   "rules": {
-    "max-nesting-depth": [
-      3,
-      {
-        "ignoreAtRules": ["media"]
-      }
+    "a11y/media-prefers-reduced-motion": null,
+    "a11y/no-outline-none": null,
+    "a11y/selector-pseudo-class-focus": null,
+    "declaration-property-value-disallowed-list": null,
+    "font-family-no-missing-generic-family-keyword": null,
+    "max-nesting-depth": null,
+    "media-query-no-invalid": null,
+    "no-descending-specificity": null,
+    "no-invalid-position-at-import-rule": null,
+    "no-irregular-whitespace": null,
+    "order/order": [
+      [
+        "custom-properties",
+        "dollar-variables",
+        "declarations",
+        {
+          "type": "at-rule",
+          "name": "extend"
+        },
+        {
+          "type": "at-rule",
+          "name": "include",
+          "hasBlock": false
+        },
+        {
+          "type": "at-rule",
+          "name": "include",
+          "hasBlock": true
+        },
+        "rules"
+      ]
     ],
-    "declaration-no-important": true,
-    "font-weight-notation": "named-where-possible",
-    "selector-no-qualifying-type": [
-      true,
-      {
-        "ignore": ["class"]
-      }
-    ]
+    "order/properties-alphabetical-order": true,
+    "property-no-vendor-prefix": null,
+    "selector-class-pattern": null,
+    "selector-max-compound-selectors": null,
+    "selector-max-id": null,
+    "selector-no-qualifying-type": null,
+    "selector-pseudo-element-colon-notation": null
   }
 }

@@ -1,4 +1,20 @@
-import type bcd from "@mdn/browser-compat-data/types";
+import type BCD from "@mdn/browser-compat-data/types";
+
+// Extended for the fields, beyond the bcd types, that are extra-added
+// exclusively in Yari.
+export interface SimpleSupportStatementExtended
+  extends BCD.SimpleSupportStatement {
+  // Known for some support statements where the browser *version* is known,
+  // as opposed to just "true" and if the version release date is known.
+  release_date?: string;
+  // The version before the version_removed if the *version* removed is known,
+  // as opposed to just "true". Otherwise the version_removed.
+  version_last?: BCD.VersionValue;
+}
+
+export type SupportStatementExtended =
+  | SimpleSupportStatementExtended
+  | SimpleSupportStatementExtended[];
 
 export function getFirst<T>(a: T | T[]): T;
 export function getFirst<T>(a: T | T[] | undefined): T | undefined {
@@ -15,33 +31,174 @@ export function isTruthy<T>(t: T | false | undefined | null): t is T {
 
 interface Feature {
   name: string;
-  compat: bcd.CompatStatement;
-  isRoot: boolean;
+  compat: BCD.CompatStatement;
+  depth: number;
+}
+
+function findFirstCompatDepth(identifier: BCD.Identifier) {
+  const entries = [["", identifier]];
+
+  while (entries.length) {
+    const [path, value] = entries.shift() as [string, BCD.Identifier];
+    if (value.__compat) {
+      // Following entries have at least this depth.
+      return path.split(".").length;
+    }
+
+    for (const key of Object.keys(value)) {
+      const subpath = path ? `${path}.${key}` : key;
+      entries.push([subpath, value[key]]);
+    }
+  }
+
+  // Fallback.
+  return 0;
 }
 
 export function listFeatures(
-  identifier: bcd.Identifier,
+  identifier: BCD.Identifier,
   parentName: string = "",
-  rootName: string = ""
+  rootName: string = "",
+  depth: number = 0,
+  firstCompatDepth: number = 0
 ): Feature[] {
   const features: Feature[] = [];
   if (rootName && identifier.__compat) {
     features.push({
       name: rootName,
       compat: identifier.__compat,
-      isRoot: true,
+      depth,
     });
   }
-
-  for (const [subName, subIdentifier] of Object.entries(identifier)) {
-    if (subName !== "__compat" && subIdentifier.__compat) {
+  if (rootName) {
+    firstCompatDepth = findFirstCompatDepth(identifier);
+  }
+  for (const subName of Object.keys(identifier)) {
+    if (subName === "__compat") {
+      continue;
+    }
+    const subIdentifier = identifier[subName];
+    if (subIdentifier.__compat) {
       features.push({
         name: parentName ? `${parentName}.${subName}` : subName,
         compat: subIdentifier.__compat,
-        isRoot: parentName !== "",
+        depth: depth + 1,
       });
-      features.push(...listFeatures(subIdentifier, subName));
+    }
+    if (subIdentifier.__compat || depth + 1 < firstCompatDepth) {
+      features.push(
+        ...listFeatures(subIdentifier, subName, "", depth + 1, firstCompatDepth)
+      );
     }
   }
   return features;
+}
+
+export function hasMore(support: BCD.SupportStatement | undefined) {
+  return Array.isArray(support) && support.length > 1;
+}
+
+export function versionIsPreview(
+  version: BCD.VersionValue | string | undefined,
+  browser: BCD.BrowserStatement
+): boolean {
+  if (version === "preview") {
+    return true;
+  }
+
+  if (browser && typeof version === "string" && browser.releases[version]) {
+    return ["beta", "nightly", "planned"].includes(
+      browser.releases[version].status
+    );
+  }
+
+  return false;
+}
+
+export function hasNoteworthyNotes(support: BCD.SimpleSupportStatement) {
+  return (
+    !!(support.notes?.length || support.impl_url?.length) &&
+    !support.version_removed &&
+    !support.partial_implementation
+  );
+}
+
+export function bugURLToString(url: string) {
+  const bugNumber = url.match(
+    /^https:\/\/(?:crbug\.com|webkit\.org\/b|bugzil\.la)\/([0-9]+)/i
+  )?.[1];
+  return bugNumber ? `bug ${bugNumber}` : url;
+}
+
+function hasLimitation(support: BCD.SimpleSupportStatement) {
+  return hasMajorLimitation(support) || support.notes || support.impl_url;
+}
+
+function hasMajorLimitation(support: BCD.SimpleSupportStatement) {
+  return (
+    support.partial_implementation ||
+    support.alternative_name ||
+    support.flags ||
+    support.prefix ||
+    support.version_removed
+  );
+}
+export function isFullySupportedWithoutLimitation(
+  support: BCD.SimpleSupportStatement
+) {
+  return support.version_added && !hasLimitation(support);
+}
+
+export function isNotSupportedAtAll(support: BCD.SimpleSupportStatement) {
+  return !support.version_added && !hasLimitation(support);
+}
+
+function isFullySupportedWithoutMajorLimitation(
+  support: BCD.SimpleSupportStatement
+) {
+  return support.version_added && !hasMajorLimitation(support);
+}
+
+// Prioritizes support items
+export function getCurrentSupport(
+  support: SupportStatementExtended | undefined
+): SimpleSupportStatementExtended | undefined {
+  if (!support) return undefined;
+
+  // Full support without limitation
+  const noLimitationSupportItem = asList(support).find((item) =>
+    isFullySupportedWithoutLimitation(item)
+  );
+  if (noLimitationSupportItem) return noLimitationSupportItem;
+
+  // Full support with only notes and version_added
+  const minorLimitationSupportItem = asList(support).find((item) =>
+    isFullySupportedWithoutMajorLimitation(item)
+  );
+  if (minorLimitationSupportItem) return minorLimitationSupportItem;
+
+  // Full support with altname/prefix
+  const altnamePrefixSupportItem = asList(support).find(
+    (item) => !item.version_removed && (item.prefix || item.alternative_name)
+  );
+  if (altnamePrefixSupportItem) return altnamePrefixSupportItem;
+
+  // Partial support
+  const partialSupportItem = asList(support).find(
+    (item) => !item.version_removed && item.partial_implementation
+  );
+  if (partialSupportItem) return partialSupportItem;
+
+  // Support with flags only
+  const flagSupportItem = asList(support).find(
+    (item) => !item.version_removed && item.flags
+  );
+  if (flagSupportItem) return flagSupportItem;
+
+  // No/Inactive support
+  const noSupportItem = asList(support).find((item) => item.version_removed);
+  if (noSupportItem) return noSupportItem;
+
+  // Default (likely never reached)
+  return getFirst(support);
 }

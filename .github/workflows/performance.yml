@@ -13,34 +13,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v4
         with:
           # Needed because of
           # https://github.com/GoogleChrome/lighthouse-ci/issues/172
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v4
         with:
           repository: mdn/content
           path: mdn/content
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.4.1
+        uses: actions/setup-node@v4
         with:
-          node-version: "12"
+          node-version-file: ".nvmrc"
+          cache: yarn
 
-      - name: Cache node_modules
-        uses: actions/cache@v2.1.7
-        id: cached-node_modules
+      - name: Cache @vscode/ripgrep bin
+        uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.github/workflows/performance.yml') }}
+          key: vscode-ripgrep-bin-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          path: node_modules/@vscode/ripgrep/bin/
 
       - name: Install all yarn packages
-        if: steps.cached-node_modules.outputs.cache-hit != 'true'
-        run: |
-          yarn --frozen-lockfile
+        run: yarn --frozen-lockfile
+        env:
+          # https://github.com/microsoft/vscode-ripgrep#github-api-limit-note
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build select important pages
         env:
@@ -50,11 +50,11 @@ jobs:
 
           # Make sure it's set to something so that the build uses the
           # Google Analytics tag which is most realistic.
-          BUILD_GOOGLE_ANALYTICS_ACCOUNT: UA-00000000-0
+          BUILD_GOOGLE_ANALYTICS_MEASUREMENT_ID: G-XXXXXXXX
         run: |
-          yarn prepare-build
-          # BUILD_FOLDERSEARCH=mdn/kitchensink yarn build
-          BUILD_FOLDERSEARCH=web/javascript/reference/global_objects/array/foreach yarn build
+          yarn build:prepare
+          yarn build -f $CONTENT_ROOT/en-us/web/javascript/reference/global_objects/array/foreach -f $CONTENT_ROOT/en-us/mdn/kitchensink
+          yarn render:html
 
       - name: Serve and lhci
         env:
@@ -63,7 +63,7 @@ jobs:
           yarn start:static-server &
           sleep 1
           curl --retry-connrefused --retry 5 \
-            http://localhost:5000/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach/ > /dev/null
+            http://localhost:5042/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach/ > /dev/null
 
           npm install -g @lhci/cli@next
 
@@ -75,7 +75,7 @@ jobs:
 
           lhci autorun \
             --upload.target=temporary-public-storage \
-            --collect.url="http://localhost:5000/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach/"
+            --collect.url="http://localhost:5042/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach/"
 
           # TODO (as of Oct 2020)
           # Once our Lighthouse score starts to not be so terrible, we can start

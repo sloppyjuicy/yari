@@ -2,12 +2,13 @@ import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import useSWR from "swr";
 
-import { CRUD_MODE, CRUD_MODE_HOSTNAMES } from "../constants";
+import { WRITER_MODE, WRITER_MODE_HOSTNAMES } from "../env";
 import { useLocale } from "../hooks";
 import { Loading } from "../ui/atoms/loading";
-import { PageContentContainer } from "../ui/atoms/page-content";
+import { MainContentContainer } from "../ui/atoms/page-content";
 
 import "./index.scss";
+import NoteCard from "../ui/molecules/notecards";
 
 interface SearchIndexDoc {
   url: string;
@@ -186,24 +187,24 @@ export default function Sitemap() {
   }
 
   return (
-    <PageContentContainer>
+    <MainContentContainer>
       <div id="sitemap">
         {error && (
-          <div className="notecard error">
+          <NoteCard type="error">
             <h4>Error</h4>
             <p>
               <code>{error.toString()}</code>
             </p>
-          </div>
+          </NoteCard>
         )}
 
         {editorOpeningError && (
-          <div className="notecard error">
+          <NoteCard type="error">
             <h4>Error opening in your editor</h4>
             <p>
               <code>{editorOpeningError.toString()}</code>
             </p>
-          </div>
+          </NoteCard>
         )}
 
         {!data && !error && <Loading />}
@@ -262,7 +263,7 @@ export default function Sitemap() {
           Note, this sitemap only shows documents. Not any other applications.
         </p>
       </div>
-    </PageContentContainer>
+    </MainContentContainer>
   );
 }
 
@@ -398,7 +399,7 @@ function Breadcrumb({
   const root = pathname.split("/").slice(0, 2);
   root.push("_sitemap");
 
-  const isReadOnly = !CRUD_MODE_HOSTNAMES.includes(window.location.hostname);
+  const isReadOnly = !WRITER_MODE_HOSTNAMES.includes(window.location.hostname);
 
   return (
     <>
@@ -428,7 +429,7 @@ function Breadcrumb({
               <Link to={thisDoc.url}>
                 <em>{thisDoc.title}</em>
               </Link>{" "}
-              {CRUD_MODE && !isReadOnly && (
+              {WRITER_MODE && !isReadOnly && (
                 <small>
                   (
                   <a
@@ -468,7 +469,7 @@ function ShowTree({
   openInYourEditor: (url: string) => void;
 }) {
   const locale = useLocale();
-  const isReadOnly = !CRUD_MODE_HOSTNAMES.includes(window.location.hostname);
+  const isReadOnly = !WRITER_MODE_HOSTNAMES.includes(window.location.hostname);
   return (
     <div className="tree">
       <ul>

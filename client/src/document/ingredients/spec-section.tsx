@@ -1,4 +1,6 @@
 import { DisplayH2, DisplayH3 } from "./utils";
+import NoteCard from "../../ui/molecules/notecards";
+import { Specification } from "../../../../libs/types/document";
 
 export function SpecificationSection({
   id,
@@ -10,11 +12,7 @@ export function SpecificationSection({
   id: string;
   title: string;
   isH3: boolean;
-  specifications: Array<{
-    title: string;
-    bcdSpecificationURL: string;
-    shortTitle: string;
-  }>;
+  specifications: Specification[];
   query: string;
 }) {
   return (
@@ -34,9 +32,7 @@ export function SpecificationSection({
               <tr key={spec.bcdSpecificationURL}>
                 <td>
                   <a href={spec.bcdSpecificationURL}>
-                    {spec.title}{" "}
-                    {spec.title !== spec.shortTitle && `(${spec.shortTitle})`}
-                    <br />
+                    {spec.title} <br />
                     {spec.bcdSpecificationURL.includes("#") && (
                       <small>
                         # {`${spec.bcdSpecificationURL.split("#")[1]}`}
@@ -49,7 +45,7 @@ export function SpecificationSection({
           </tbody>
         </table>
       ) : (
-        <div className="notecard warning">
+        <NoteCard type="warning">
           <h4>No specification found</h4>
           <p>
             No specification data found for <code>{query}</code>.<br />
@@ -62,7 +58,7 @@ export function SpecificationSection({
             <a href="https://github.com/w3c/browser-specs">w3c/browser-specs</a>
             .
           </p>
-        </div>
+        </NoteCard>
       )}
     </>
   );

@@ -1,29 +1,134 @@
 import * as React from "react";
+import { Icon } from "../icon";
+import InternalLink from "../internal-link";
+
+import "./index.scss";
+import { FormMethod } from "react-router-dom";
 
 type ButtonProps = {
+  title?: string;
+
+  type?: "primary" | "secondary" | "action" | "select" | "link";
+
   /**
-   * The `type` of the button
+   * The `type` of the button. Not used with links.
    */
   buttonType?: "button" | "submit" | "reset";
+  name?: string;
+  extraClasses?: string | null;
+  href?: string;
+  target?: string;
+  rel?: string;
+  icon?: string;
+
+  id?: string;
   /**
-   * The button state.
-   * Available options are:
-   * `positive`, `danger`, `outline`, `ghost`, `inactive`
-   * Combinations are also possible such as:
-   * `outline positive`
+   * Should the button be disabled? This is optional with a default of false
    */
-  state?: string;
-  children: React.ReactNode;
+  isDisabled?: boolean;
+  formMethod?: FormMethod | "dialog";
+  onClickHandler?: (event: React.MouseEvent<Element>) => void;
+  onFocusHandler?: (event: React.FocusEvent<Element>) => void;
+
+  size?: "small" | "medium";
+
+  state?: "default" | "hover" | "active" | "focused" | "inactive";
+  value?: string;
+  children?: React.ReactNode;
 };
 
 export const Button = ({
+  title,
+  name,
+  type = "primary",
   buttonType = "button",
-  state = "primary",
+  extraClasses,
+  href,
+  target,
+  rel,
+  icon,
+  id,
+  isDisabled = false,
+  onClickHandler,
+  onFocusHandler,
+  size,
+  state,
+  value,
+  formMethod,
   children,
+  ...passthroughAttrs
 }: ButtonProps) => {
+  let buttonClasses = "button";
+  [type, size, state].forEach((attr) => {
+    if (attr) {
+      buttonClasses += ` ${attr}`;
+    }
+  });
+
+  buttonClasses += icon ? " has-icon" : "";
+  buttonClasses += extraClasses ? ` ${extraClasses}` : "";
+
+  function renderContent() {
+    if (icon) {
+      return (
+        <>
+          <Icon name={icon} />
+          {children}
+        </>
+      );
+    }
+
+    return children;
+  }
+
+  if (href) {
+    if (target) {
+      return (
+        <a
+          href={href}
+          target={target}
+          rel={rel}
+          className={buttonClasses}
+          id={id}
+          onClick={onClickHandler}
+          onFocus={onFocusHandler}
+          title={title}
+          {...passthroughAttrs}
+        >
+          <span className="button-wrap">{renderContent()}</span>
+        </a>
+      );
+    }
+    return (
+      <InternalLink
+        to={href}
+        rel={rel}
+        className={buttonClasses}
+        id={id}
+        onClick={onClickHandler}
+        onFocus={onFocusHandler}
+        title={title}
+        {...passthroughAttrs}
+      >
+        <span className="button-wrap">{renderContent()}</span>
+      </InternalLink>
+    );
+  }
   return (
-    <button type={buttonType} className={`button ${state}`}>
-      {children}
+    <button
+      title={title}
+      disabled={isDisabled}
+      id={id}
+      type={buttonType}
+      className={buttonClasses}
+      onClick={onClickHandler}
+      onFocus={onFocusHandler}
+      value={value}
+      name={name}
+      formMethod={formMethod}
+      {...passthroughAttrs}
+    >
+      <span className="button-wrap">{renderContent()}</span>
     </button>
   );
 };

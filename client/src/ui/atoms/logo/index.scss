@@ -1,17 +1,22 @@
-@import "~@mdn/minimalist/sass/vars/layout";
+@use "../../vars" as *;
 
 .logo {
-  display: block;
-  height: 35px;
-  width: 170px;
+  align-items: center;
+  display: flex;
+  // Width of largest logo ("mdn web docs").
+  width: 160px;
 
-  @media #{$mq-tablet-and-up} {
-    height: 55px;
-    width: 200px;
+  svg {
+    height: 1.5rem;
+    margin-top: 0.3rem;
   }
 
-  @media #{$mq-large-desktop-and-up} {
-    flex-basis: 250px;
-    height: inherit;
+  .logo-m,
+  .logo-_ {
+    fill: var(--text-link);
+  }
+
+  .logo-text {
+    fill: var(--text-primary);
   }
 }
